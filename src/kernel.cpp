@@ -31,7 +31,21 @@ enum vga_color {
 	VGA_COLOR_LIGHT_BROWN = 14,
 	VGA_COLOR_WHITE = 15,
 };
+
+const uint16_t SERIAL_PORT = 0x3F8;
+bool isDebugLogActivated = false;
  
+static inline void outb(uint16_t port, uint8_t data){
+    asm volatile("outb %0, %1" : : "a" (data), "Nd"(port));
+}
+
+static inline uint8_t inb(uint16_t port){
+    uint8_t value;
+    asm volatile("inb %1, %0" : "=a"(value) : "Nd"(port));
+    return value;
+}
+
+
 static inline uint8_t vga_entry_color(enum vga_color fg, enum vga_color bg) 
 {
 	return fg | bg << 4;
@@ -138,6 +152,52 @@ void printDecimal(uint32_t dec){
     const char* Digits = "0123456789";
     terminal_putchar(Digits[digit]);
 }
+
+void initializeSerialAsOutputLog(){
+    outb(SERIAL_PORT + 1, 0x00);
+    outb(SERIAL_PORT + 3, 0x80);
+    outb(SERIAL_PORT + 0, 0x03);
+    outb(SERIAL_PORT + 1, 0x00);
+    outb(SERIAL_PORT + 3, 0x03);
+    outb(SERIAL_PORT + 2, 0xC7);
+    outb(SERIAL_PORT + 4, 0x0B);
+    isDebugLogActivated = true;
+}
+
+int serial_received(){
+    return inb(SERIAL_PORT + 5) & 1;
+}
+
+char readSerial(){
+    while (serial_received() == 0);
+    
+    return inb(SERIAL_PORT);
+}
+
+int isTransmitEmpty(){
+    return inb(SERIAL_PORT + 5) & 0x20;
+}
+
+void writeSerial(char c){
+    while (isTransmitEmpty() == 0);
+    
+    outb(SERIAL_PORT, c);
+}
+
+void printDebugSerial(const char* string){
+    size_t size = strlen(string);
+    if(isDebugLogActivated){
+        for (size_t i = 0; i < size; i++)
+            writeSerial(string[i]);
+    }
+}
+
+void printlnDebugSerial(const char* string){
+    if(isDebugLogActivated){
+        printDebugSerial(string);
+        writeSerial('\n');
+    }
+}
  
 extern "C" void kernel_main(void) 
 {
@@ -147,5 +207,8 @@ extern "C" void kernel_main(void)
 	/* Newline support is left as an exercise. */
 	terminal_writestring("Welcome, to Project Jupiter!\n");
     terminal_writestring("Version 0.1\n");
+    initializeSerialAsOutputLog();
+    printlnDebugSerial("Initialized Serial Port");
+    printDebugSerial("blah\nblah");
     
 }
