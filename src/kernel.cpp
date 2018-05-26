@@ -116,6 +116,28 @@ void terminal_writestring(const char* data)
 {
 	terminal_write(data, strlen(data));
 }
+
+void printHex(uint32_t hex){
+    uint8_t digit = hex % 16;
+    hex -= digit;
+    hex /= 16;
+    if(hex > 0){
+        printHex(hex);
+    }
+    const char* Digits = "0123456789ABCDEF";
+    terminal_putchar(Digits[digit]);
+}
+
+void printDecimal(uint32_t dec){
+    uint8_t digit = dec % 10;
+    dec -= digit;
+    dec /= 10;
+    if(dec > 0){
+        printDecimal(dec);
+    }
+    const char* Digits = "0123456789";
+    terminal_putchar(Digits[digit]);
+}
  
 extern "C" void kernel_main(void) 
 {
@@ -125,4 +147,5 @@ extern "C" void kernel_main(void)
 	/* Newline support is left as an exercise. */
 	terminal_writestring("Welcome, to Project Jupiter!\n");
     terminal_writestring("Version 0.1\n");
+    
 }
