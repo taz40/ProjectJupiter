@@ -1,6 +1,5 @@
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
+#include "types.h"
+#include "gdt.h"
  
 /* Check if the compiler thinks we are targeting the wrong operating system. */
 #if defined(__linux__)
@@ -209,6 +208,8 @@ extern "C" void kernel_main(void)
     terminal_writestring("Version 0.1\n");
     initializeSerialAsOutputLog();
     printlnDebugSerial("Initialized Serial Port");
-    printDebugSerial("blah\nblah");
+    printlnDebugSerial("Initializing GDT");
+    GlobalDescriptorTable gdt();
+    printlnDebugSerial("GDT initialized");
     
 }
