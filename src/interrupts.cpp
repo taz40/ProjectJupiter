@@ -1,8 +1,24 @@
 
 #include "interrupts.h"
 
-void terminal_writestring(const char* data);
-void printHex(uint32_t hex);
+void printlnDebugSerial(const char* string);
+void printDebugSerial(const char* string);
+void printHexSerial(uint32_t hex);
+
+InterruptHandler::InterruptHandler(InterruptManager* interruptManager, uint8_t InterruptNumber){
+    this->interruptNumber = InterruptNumber;
+    this->interruptManager = interruptManager;
+    interruptManager->handlers[interruptNumber] = this;
+}
+
+InterruptHandler::~InterruptHandler(){
+    if(interruptManager->handlers[interruptNumber] == this){
+        interruptManager->handlers[interruptNumber] = 0;
+    }
+}
+uint32_t InterruptHandler::HandleInterrupt(uint32_t esp){
+    return esp;
+}
 
 
 InterruptManager::GateDescriptor InterruptManager::interruptDescriptorTable[256];
@@ -31,9 +47,11 @@ programmableInterruptControllerSlaveDataPort(0xA1){
     const uint8_t IDT_INTERRUPT_GATE = 0xE;
     for(uint8_t i = 255; i > 0; --i){
         SetInterruptDescriptorTableEntry(i, CodeSegment, &InterruptIgnore, 0, IDT_INTERRUPT_GATE);
+        handlers[i] = 0;
     }
     
     SetInterruptDescriptorTableEntry(0, CodeSegment, &InterruptIgnore, 0, IDT_INTERRUPT_GATE);
+    handlers[0] = 0;
     
     SetInterruptDescriptorTableEntry(0x00, CodeSegment, &HandleException0x00, 0, IDT_INTERRUPT_GATE);
     SetInterruptDescriptorTableEntry(0x01, CodeSegment, &HandleException0x01, 0, IDT_INTERRUPT_GATE);
@@ -123,10 +141,15 @@ uint32_t InterruptManager::HandleInterrupt(uint8_t interrupt, uint32_t esp){
 }
 
 uint32_t InterruptManager::DoHandleInterrupt(uint8_t interrupt, uint32_t esp){
-    if(interrupt != hardwareInterruptOffset){
-        printHex(interrupt);
-        terminal_writestring("\n");
+    if(handlers[interrupt] != 0){
+        esp = handlers[interrupt]->HandleInterrupt(esp);
+    }else if(interrupt != hardwareInterruptOffset){
+        printDebugSerial("Unhandled Interrupt: 0x");
+        printHexSerial(interrupt);
+        printlnDebugSerial("");
     }
+    
+    
     
     if(hardwareInterruptOffset <= interrupt && interrupt < hardwareInterruptOffset+16){
         programmableInterruptControllerMasterCommandPort.Write(0x20);

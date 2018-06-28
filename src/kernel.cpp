@@ -1,6 +1,7 @@
 #include "types.h"
 #include "gdt.h"
 #include "interrupts.h"
+#include "keyboard.h"
  
 /* Check if the compiler thinks we are targeting the wrong operating system. */
 #if defined(__linux__)
@@ -198,6 +199,17 @@ void printlnDebugSerial(const char* string){
         writeSerial('\n');
     }
 }
+
+void printHexSerial(uint32_t hex){
+    uint8_t digit = hex % 16;
+    hex -= digit;
+    hex /= 16;
+    if(hex > 0){
+        printHexSerial(hex);
+    }
+    const char* Digits = "0123456789ABCDEF";
+    writeSerial(Digits[digit]);
+}
  
 extern "C" void kernel_main(void) 
 {
@@ -214,6 +226,7 @@ extern "C" void kernel_main(void)
     printlnDebugSerial("GDT initialized");
     printlnDebugSerial("Initializing IDT");
     InterruptManager interrupts((uint16_t)0x20, &gdt);
+    KeyboardDriver keyboard(&interrupts);
     interrupts.Activate();
     printlnDebugSerial("IDT initialized");
     
