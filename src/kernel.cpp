@@ -1,5 +1,6 @@
 #include "types.h"
 #include "gdt.h"
+#include "interrupts.h"
  
 /* Check if the compiler thinks we are targeting the wrong operating system. */
 #if defined(__linux__)
@@ -209,7 +210,12 @@ extern "C" void kernel_main(void)
     initializeSerialAsOutputLog();
     printlnDebugSerial("Initialized Serial Port");
     printlnDebugSerial("Initializing GDT");
-    GlobalDescriptorTable gdt();
+    GlobalDescriptorTable gdt;
     printlnDebugSerial("GDT initialized");
+    printlnDebugSerial("Initializing IDT");
+    InterruptManager interrupts((uint16_t)0x20, &gdt);
+    interrupts.Activate();
+    printlnDebugSerial("IDT initialized");
     
+    while(1);
 }
