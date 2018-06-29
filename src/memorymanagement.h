@@ -8,7 +8,7 @@ struct MemoryChunk{
     MemoryChunk *prev;
     bool allocated;
     size_t size;
-}
+};
 
 class MemoryManager{
 protected:
@@ -21,13 +21,13 @@ public:
     
     void* malloc(size_t size);
     void free(void* ptr);
-}
+};
 
-void* operator new(unsigned size);
-void* operator new[](unsigned size);
+void* operator new(size_t size);
+void* operator new[](size_t size);
 
-void* operator new(unsigned size, void* ptr);
-void* operator new[](unsigned size, void* ptr);
+void* operator new(size_t size, void* ptr);
+void* operator new[](size_t size, void* ptr);
 
 void operator delete(void* ptr);
 void operator delete[](void* ptr);

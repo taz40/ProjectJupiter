@@ -2,6 +2,7 @@
 #include "gdt.h"
 #include "interrupts.h"
 #include "keyboard.h"
+#include "memorymanagement.h"
  
 /* Check if the compiler thinks we are targeting the wrong operating system. */
 #if defined(__linux__)
@@ -221,13 +222,20 @@ extern "C" void kernel_main(void)
     terminal_writestring("Version 0.1\n");
     initializeSerialAsOutputLog();
     printlnDebugSerial("Initialized Serial Port");
+    
+    printlnDebugSerial("Initializing Dynamic Memory Management");
+    MemoryManager memoryManager(10*1024*1024, 64*1024*1024 - 10*1024*1024 - 10*1024);
+    printlnDebugSerial("Dynamic Memory Management initialized");
+    
+    
     printlnDebugSerial("Initializing GDT");
-    GlobalDescriptorTable gdt;
+    GlobalDescriptorTable* gdt = new GlobalDescriptorTable();
     printlnDebugSerial("GDT initialized");
+    
     printlnDebugSerial("Initializing IDT");
-    InterruptManager interrupts((uint16_t)0x20, &gdt);
-    KeyboardDriver keyboard(&interrupts);
-    interrupts.Activate();
+    InterruptManager* interrupts = new InterruptManager((uint16_t)0x20, gdt);
+    KeyboardDriver* keyboard = new KeyboardDriver(interrupts);
+    interrupts->Activate();
     printlnDebugSerial("IDT initialized");
     
     while(1);
