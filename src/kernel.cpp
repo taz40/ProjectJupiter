@@ -3,6 +3,7 @@
 #include "interrupts.h"
 #include "keyboard.h"
 #include "memorymanagement.h"
+#include "multitasking.h"
  
 /* Check if the compiler thinks we are targeting the wrong operating system. */
 #if defined(__linux__)
@@ -211,6 +212,16 @@ void printHexSerial(uint32_t hex){
     const char* Digits = "0123456789ABCDEF";
     writeSerial(Digits[digit]);
 }
+
+void taskA(){
+    while(1)
+        terminal_writestring("A");
+}
+
+void taskB(){
+    while(1)
+        terminal_writestring("B");
+}
  
 extern "C" void kernel_main(void) 
 {
@@ -232,9 +243,15 @@ extern "C" void kernel_main(void)
     GlobalDescriptorTable* gdt = new GlobalDescriptorTable();
     printlnDebugSerial("GDT initialized");
     
+    TaskManager* taskManager = new TaskManager();
+    Task* task1 = new Task(gdt, taskA);
+    Task* task2 = new Task(gdt, taskB);
+    taskManager->AddTask(task1);
+    taskManager->AddTask(task2);
+    
     printlnDebugSerial("Initializing IDT");
-    InterruptManager* interrupts = new InterruptManager((uint16_t)0x20, gdt);
-    KeyboardDriver* keyboard = new KeyboardDriver(interrupts);
+    InterruptManager* interrupts = new InterruptManager((uint16_t)0x20, gdt, taskManager);
+    //KeyboardDriver* keyboard = new KeyboardDriver(interrupts);
     interrupts->Activate();
     printlnDebugSerial("IDT initialized");
     

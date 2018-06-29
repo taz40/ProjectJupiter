@@ -4,6 +4,7 @@
 #include "gdt.h"
 #include "types.h"
 #include "port.h"
+#include "multitasking.h"
 
 class InterruptManager;
 
@@ -23,6 +24,7 @@ protected:
     
     static InterruptManager* ActiveInterruptManager;
     InterruptHandler* handlers[256];
+    TaskManager* taskManager;
     
     struct GateDescriptor{
         uint16_t handlerAddressLowBits;
@@ -93,7 +95,7 @@ protected:
     Port8BitSlow programmableInterruptControllerSlaveDataPort;
     
 public:
-    InterruptManager(uint16_t hardwareInterruptOffset, GlobalDescriptorTable* gdt);
+    InterruptManager(uint16_t hardwareInterruptOffset, GlobalDescriptorTable* gdt, TaskManager* taskManager);
     ~InterruptManager();
     uint16_t HardwareInterruptOffset();
     void Activate();
