@@ -29,7 +29,7 @@ class Task{
     friend class TaskManager;
 private:
     CPUState* cpustate;
-    uint8_t* stack;
+    uint8_t stack[4096];
 public:
     Task(GlobalDescriptorTable* gdt, void entrypoint());
     ~Task();

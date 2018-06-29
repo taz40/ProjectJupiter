@@ -1,6 +1,6 @@
 
 
-objects = obj/kernel.o obj/loader.o obj/gdt.o obj/port.o obj/interrupts.o obj/interruptstubs.o obj/keyboard.o obj/memorymanagement.o obj/multitasking.o
+objects = obj/kernel.o obj/loader.o obj/gdt.o obj/port.o obj/interrupts.o obj/interruptstubs.o obj/keyboard.o obj/memorymanagement.o obj/multitasking.o obj/Events.o
 
 obj/%.o: src/%.cpp
 	mkdir -p $(@D)

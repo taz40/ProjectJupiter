@@ -1,9 +1,7 @@
 #include "multitasking.h"
 
 Task::Task(GlobalDescriptorTable* gdt, void entrypoint()){
-    
-    stack = new uint8_t[4096];
-    cpustate = new CPUState();
+    cpustate = (CPUState*)(stack + 4096 - sizeof(CPUState));
     
     cpustate->eax = 0;
     cpustate->ebx = 0;

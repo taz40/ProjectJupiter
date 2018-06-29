@@ -4,6 +4,7 @@
 #include "keyboard.h"
 #include "memorymanagement.h"
 #include "multitasking.h"
+#include "Events.h"
  
 /* Check if the compiler thinks we are targeting the wrong operating system. */
 #if defined(__linux__)
@@ -213,16 +214,20 @@ void printHexSerial(uint32_t hex){
     writeSerial(Digits[digit]);
 }
 
-void taskA(){
-    while(1)
-        terminal_writestring("A");
+void shell(){
+    while(1){
+        Event e = EventManager::activeEventManager->pollEvent(EventType::EVENT_KEYBOARD);
+        KeyEvent* keyevent = (KeyEvent*)e.data;
+        if(keyevent->key == KeyCode::VK_A && keyevent->press){
+            if(keyevent->shift != keyevent->caps){
+                terminal_writestring("A\n");
+            }else{
+                terminal_writestring("a\n");
+            }
+        }
+    }
 }
 
-void taskB(){
-    while(1)
-        terminal_writestring("B");
-}
- 
 extern "C" void kernel_main(void) 
 {
 	/* Initialize terminal interface */
@@ -243,17 +248,18 @@ extern "C" void kernel_main(void)
     GlobalDescriptorTable* gdt = new GlobalDescriptorTable();
     printlnDebugSerial("GDT initialized");
     
+    EventManager* eventManager = new EventManager();
+    
     TaskManager* taskManager = new TaskManager();
-    Task* task1 = new Task(gdt, taskA);
-    Task* task2 = new Task(gdt, taskB);
+    Task* task1 = new Task(gdt, shell);
     taskManager->AddTask(task1);
-    taskManager->AddTask(task2);
     
     printlnDebugSerial("Initializing IDT");
     InterruptManager* interrupts = new InterruptManager((uint16_t)0x20, gdt, taskManager);
-    //KeyboardDriver* keyboard = new KeyboardDriver(interrupts);
+    KeyboardDriver* keyboard = new KeyboardDriver(interrupts);
     interrupts->Activate();
     printlnDebugSerial("IDT initialized");
+
     
     while(1);
 }
