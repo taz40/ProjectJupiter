@@ -20,12 +20,13 @@ class EventManager{
 private:
     Event* queue;
     uint8_t eventNum;
+    bool QueueInUse;
 public:
     static EventManager* activeEventManager;
     EventManager();
     ~EventManager();
     void AddEvent(Event event);
-    Event pollEvent(EventType type);
+    Event* pollEvent(EventType type);
 };
 
 #endif

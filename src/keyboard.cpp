@@ -2,7 +2,525 @@
 #include "Events.h"
 
 void printlnDebugSerial(const char* string);
+void printHex(uint32_t hex);
+void terminal_writestring(const char* data);
+void printBin(uint32_t bin);
 
+char KeyboardDriver::NormKeys[126] = {
+    '\0',
+    '\0',
+    '1',
+    '2',
+    '3',
+    '4',
+    '5',
+    '6',
+    '7',
+    '8',
+    '9',
+    '0',
+    '-',
+    '=',
+    '\0',
+    '\0',
+    'q',
+    'w',
+    'e',
+    'r',
+    't',
+    'y',
+    'u',
+    'i',
+    'o',
+    'p',
+    '[',
+    ']',
+    '\n',
+    '\0',
+    'a',
+    's',
+    'd',
+    'f',
+    'g',
+    'h',
+    'j',
+    'k',
+    'l',
+    ';',
+    '\'',
+    '`',
+    '\0',
+    '\\',
+    'z',
+    'x',
+    'c',
+    'v',
+    'b',
+    'n',
+    'm',
+    ',',
+    '.',
+    '/',
+    '\0',
+    '*',
+    '\0',
+    ' ',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '7',
+    '8',
+    '9',
+    '-',
+    '4',
+    '5',
+    '6',
+    '+',
+    '1',
+    '2',
+    '3',
+    '0',
+    '.',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\n',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '/',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0'
+};
+
+char KeyboardDriver::ShiftKeys[126] = {
+    '\0',
+    '\0',
+    '!',
+    '@',
+    '#',
+    '$',
+    '%',
+    '^',
+    '&',
+    '*',
+    '(',
+    ')',
+    '_',
+    '+',
+    '\0',
+    '\0',
+    'Q',
+    'W',
+    'E',
+    'R',
+    'T',
+    'Y',
+    'U',
+    'I',
+    'O',
+    'P',
+    '{',
+    '}',
+    '\n',
+    '\0',
+    'A',
+    'S',
+    'D',
+    'F',
+    'G',
+    'H',
+    'J',
+    'K',
+    'L',
+    ':',
+    '\'',
+    '~',
+    '\0',
+    '|',
+    'Z',
+    'X',
+    'C',
+    'V',
+    'B',
+    'N',
+    'M',
+    '<',
+    '>',
+    '?',
+    '\0',
+    '*',
+    '\0',
+    ' ',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '7',
+    '8',
+    '9',
+    '-',
+    '4',
+    '5',
+    '6',
+    '+',
+    '1',
+    '2',
+    '3',
+    '0',
+    '.',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\n',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '/',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0'
+};
+
+char KeyboardDriver::CapsKeys[126] = {
+    '\0',
+    '\0',
+    '1',
+    '2',
+    '3',
+    '4',
+    '5',
+    '6',
+    '7',
+    '8',
+    '9',
+    '0',
+    '-',
+    '=',
+    '\0',
+    '\0',
+    'Q',
+    'W',
+    'E',
+    'R',
+    'T',
+    'Y',
+    'U',
+    'I',
+    'O',
+    'P',
+    '[',
+    ']',
+    '\n',
+    '\0',
+    'A',
+    'S',
+    'D',
+    'F',
+    'G',
+    'H',
+    'J',
+    'K',
+    'L',
+    ';',
+    '\'',
+    '`',
+    '\0',
+    '\\',
+    'Z',
+    'X',
+    'C',
+    'V',
+    'B',
+    'N',
+    'M',
+    ',',
+    '.',
+    '/',
+    '\0',
+    '*',
+    '\0',
+    ' ',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '7',
+    '8',
+    '9',
+    '-',
+    '4',
+    '5',
+    '6',
+    '+',
+    '1',
+    '2',
+    '3',
+    '0',
+    '.',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\n',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '/',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0'
+};
+
+char KeyboardDriver::ShiftCapsKeys[126] = {
+    '\0',
+    '\0',
+    '!',
+    '@',
+    '#',
+    '$',
+    '%',
+    '^',
+    '&',
+    '*',
+    '(',
+    ')',
+    '_',
+    '+',
+    '\0',
+    '\0',
+    'q',
+    'w',
+    'e',
+    'r',
+    't',
+    'y',
+    'u',
+    'i',
+    'o',
+    'p',
+    '{',
+    '}',
+    '\n',
+    '\0',
+    'a',
+    's',
+    'd',
+    'f',
+    'g',
+    'h',
+    'j',
+    'k',
+    'l',
+    ':',
+    '\'',
+    '~',
+    '\0',
+    '|',
+    'z',
+    'x',
+    'c',
+    'v',
+    'b',
+    'n',
+    'm',
+    '<',
+    '>',
+    '?',
+    '\0',
+    '*',
+    '\0',
+    ' ',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '7',
+    '8',
+    '9',
+    '-',
+    '4',
+    '5',
+    '6',
+    '+',
+    '1',
+    '2',
+    '3',
+    '0',
+    '.',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\n',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '/',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0',
+    '\0'
+};
 
 KeyboardDriver::KeyboardDriver(InterruptManager* manager)
 : InterruptHandler(manager, 0x21),
@@ -10,12 +528,8 @@ dataport(0x60),
 commandport(0x64){
     while(commandport.Read() & 0x1)
         dataport.Read();
-    commandport.Write(0xAE);
-    commandport.Write(0x20);
-    uint8_t status = (dataport.Read() | 1) & ~0x10;
-    commandport.Write(0x60);
-    dataport.Write(status);
-    dataport.Write(0xF4);
+    commandport.Write(0xF4);
+    numLock = true;
 }
 
 KeyboardDriver::~KeyboardDriver(){
@@ -23,6 +537,34 @@ KeyboardDriver::~KeyboardDriver(){
 
 uint32_t KeyboardDriver::HandleInterrupt(uint32_t esp){
     uint8_t key = dataport.Read();
+    
+    switch(key){
+        case 0x00:
+            printlnDebugSerial("Keyboard Error");
+            break;
+        case 0xAA:
+            //printlnDebugSerial("Selft Test Passed");
+            break;
+        case 0xEE:
+            printlnDebugSerial("Echo");
+            break;
+        case 0xFA:
+            printlnDebugSerial("Command Acknowledged");
+            break;
+        case 0xFC:
+            printlnDebugSerial("Self Test Failed");
+            break;
+        case 0xFD:
+            printlnDebugSerial("Self Test Failed");
+            break;
+        case 0xFE:
+            printlnDebugSerial("Resend Last Command");
+            break;
+        case 0xFF:
+            printlnDebugSerial("Keyboard Error");
+            break;
+    }
+    
     KeyCode code = KeyCode::VK_NONE;
     bool press = true;
     bool multi = false;
@@ -339,15 +881,33 @@ uint32_t KeyboardDriver::HandleInterrupt(uint32_t esp){
         }
     }
     
+    if(!numLock){
+        switch(code){
+            case VK_NUM7: code = VK_HOME; break;
+            case VK_NUM8: code = VK_UARROW; break;
+            case VK_NUM9: code = VK_PAGEUP; break;
+            case VK_NUM4: code = VK_LARROW; break;
+            case VK_NUM6: code = VK_RARROW; break;
+            case VK_NUM1: code = VK_END; break;
+            case VK_NUM2: code = VK_DARROW; break;
+            case VK_NUM3: code = VK_PAGEDOWN; break;
+            case VK_NUM0: code = VK_INSERT; break;
+            case VK_NUMPERIOD: code = VK_DELETE; break;
+            default:
+                break;
+        }
+    }
+    
     if(code != KeyCode::VK_NONE){
         if(code == VK_PAUSE){
             KeyEvent* event = new KeyEvent();
-            event->key = code;
+            event->keycode = code;
             event->press = press;
             event->shift = shift;
             event->caps = capsLock;
             event->num = numLock;
             event->scroll = scrollLock;
+            event->key = NormKeys[code];
             Event* e = new Event();
             e->type = EventType::EVENT_KEYBOARD;
             e->data = (uint8_t*)event;
@@ -366,8 +926,18 @@ uint32_t KeyboardDriver::HandleInterrupt(uint32_t esp){
             setLED();
         }
         
+        char key = NormKeys[code];
+        if(shift && capsLock){
+            key = ShiftCapsKeys[code];
+        }else if(shift){
+            key = ShiftKeys[code];
+        }else if (capsLock){
+            key = CapsKeys[code];
+        }
+        
         KeyEvent* event = new KeyEvent();
-        event->key = code;
+        event->keycode = code;
+        event->key = key;
         event->press = press;
         event->shift = shift;
         event->caps = capsLock;
@@ -379,13 +949,17 @@ uint32_t KeyboardDriver::HandleInterrupt(uint32_t esp){
         EventManager::activeEventManager->AddEvent(*e);
     
     }
+    //printHex(key);
+    //terminal_writestring("\n");
     return esp;
 }
 
 void KeyboardDriver::setLED(){
-    uint8_t ledStatus = capsLock;
-    ledStatus = (ledStatus < 1) | numLock;
-    ledStatus = (ledStatus < 1) | scrollLock;
+    while(commandport.Read() & 0x1)
+        dataport.Read();
+    uint8_t ledStatus = true & 0x1;
+    ledStatus = (ledStatus < 1) + true & 0x1;
+    ledStatus = (ledStatus < 1) + true & 0x1;
     commandport.Write(0xED);
-    dataport.Write(ledStatus);
+    commandport.Write(0b111);
 }

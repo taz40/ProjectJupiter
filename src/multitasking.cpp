@@ -22,6 +22,7 @@ Task::~Task(){
 }
 
 TaskManager::TaskManager(){
+    taskListInUse = false;
     numTasks = 0;
     currentTask = -1;
 }
@@ -30,10 +31,31 @@ TaskManager::~TaskManager(){
 }
 
 bool TaskManager::AddTask(Task* task){
+    while(taskListInUse);
+    taskListInUse = true;
     if(numTasks >= 256)
         return false;
     tasks[numTasks++] = task;
+    taskListInUse = false;
     return true;
+}
+
+void TaskManager::RemoveTask(Task* task){
+    int index = -1;
+    for(int i = 0; i < numTasks; i++){
+        if(tasks[i] == task){
+            index = i;
+            break;
+        }
+    }
+    if(index == -1)
+        return;
+    while(taskListInUse);
+    for(int x = index+1; x < numTasks; x++){
+        tasks[x-1] = tasks[x]; 
+    }
+    numTasks--;
+    taskListInUse = false;
 }
 
 CPUState* TaskManager::Schedule(CPUState* cpustate){

@@ -5,6 +5,7 @@
 #include "memorymanagement.h"
 #include "multitasking.h"
 #include "Events.h"
+#include "System.h"
  
 /* Check if the compiler thinks we are targeting the wrong operating system. */
 #if defined(__linux__)
@@ -36,8 +37,13 @@ enum vga_color {
 	VGA_COLOR_WHITE = 15,
 };
 
+const uint16_t PIT_DATA_PORT = 0x40;
+const uint16_t PIT_COMMAND_PORT = 0x43;
+
 const uint16_t SERIAL_PORT = 0x3F8;
 bool isDebugLogActivated = false;
+
+uint64_t time = 0;
  
 static inline void outb(uint16_t port, uint8_t data){
     asm volatile("outb %0, %1" : : "a" (data), "Nd"(port));
@@ -103,7 +109,9 @@ void terminal_putentryat(char c, uint8_t color, size_t x, size_t y)
  
 void terminal_putchar(char c) 
 {
-	
+	if(c == '\0')
+        return;
+//     
     switch(c){
         case '\n':
             for(terminal_column; terminal_column < VGA_WIDTH; terminal_column++){
@@ -154,6 +162,17 @@ void printDecimal(uint32_t dec){
         printDecimal(dec);
     }
     const char* Digits = "0123456789";
+    terminal_putchar(Digits[digit]);
+}
+
+void printBin(uint32_t bin){
+    uint8_t digit = bin % 2;
+    bin -= digit;
+    bin /= 2;
+    if(bin > 0){
+        printBin(bin);
+    }
+    const char* Digits = "01";
     terminal_putchar(Digits[digit]);
 }
 
@@ -214,24 +233,24 @@ void printHexSerial(uint32_t hex){
     writeSerial(Digits[digit]);
 }
 
-void shell(){
-    while(1){
-        Event e = EventManager::activeEventManager->pollEvent(EventType::EVENT_KEYBOARD);
-        KeyEvent* keyevent = (KeyEvent*)e.data;
-        if(keyevent->key == KeyCode::VK_A && keyevent->press){
-            if(keyevent->shift != keyevent->caps){
-                terminal_writestring("A\n");
-            }else{
-                terminal_writestring("a\n");
-            }
-        }
-    }
+void StartSystem(){
+    printlnDebugSerial("initializing System");
+    System* system = new System();
+    system->Start();
 }
 
 extern "C" void kernel_main(void) 
 {
 	/* Initialize terminal interface */
 	terminal_initialize();
+    
+    //Initialize the PIT
+    Port8Bit DataPort(PIT_DATA_PORT);
+    Port8Bit CommandPort(PIT_COMMAND_PORT);
+    int divisor = 1193180 / 100;
+    CommandPort.Write(0x36);
+    DataPort.Write(divisor & 0xFF);
+    DataPort.Write(divisor >> 8);
  
 	/* Newline support is left as an exercise. */
 	terminal_writestring("Welcome, to Project Jupiter!\n");
@@ -247,18 +266,16 @@ extern "C" void kernel_main(void)
     printlnDebugSerial("Initializing GDT");
     GlobalDescriptorTable* gdt = new GlobalDescriptorTable();
     printlnDebugSerial("GDT initialized");
-    
+        
     EventManager* eventManager = new EventManager();
-    
     TaskManager* taskManager = new TaskManager();
-    Task* task1 = new Task(gdt, shell);
+    Task* task1 = new Task(gdt, StartSystem);
     taskManager->AddTask(task1);
     
     printlnDebugSerial("Initializing IDT");
     InterruptManager* interrupts = new InterruptManager((uint16_t)0x20, gdt, taskManager);
     KeyboardDriver* keyboard = new KeyboardDriver(interrupts);
     interrupts->Activate();
-    printlnDebugSerial("IDT initialized");
 
     
     while(1);

@@ -137,7 +137,8 @@ enum KeyCode{
 
 
 struct KeyEvent{
-    KeyCode key;
+    KeyCode keycode;
+    char key;
     bool press;
     bool shift;
     bool caps;
@@ -146,12 +147,16 @@ struct KeyEvent{
 };
 
 class KeyboardDriver : public InterruptHandler{
-    Port8Bit dataport;
-    Port8Bit commandport;
+    Port8BitSlow dataport;
+    Port8BitSlow commandport;
     bool numLock;
     bool capsLock;
     bool shift;
     bool scrollLock;
+    static char NormKeys[126];
+    static char ShiftKeys[126];
+    static char CapsKeys[126];
+    static char ShiftCapsKeys[126];
     uint8_t prevMultiKey;
     bool printscrnp;
     bool printscrnr;

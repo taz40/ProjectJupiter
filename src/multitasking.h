@@ -40,10 +40,12 @@ private:
     Task* tasks[256];
     int numTasks;
     int currentTask;
+    bool taskListInUse;
 public:
     TaskManager();
     ~TaskManager();
     bool AddTask(Task* task);
+    void RemoveTask(Task* task);
     CPUState* Schedule(CPUState* cpustate);
 };
 
