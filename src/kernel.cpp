@@ -108,6 +108,29 @@ void terminal_putentryat(char c, uint8_t color, size_t x, size_t y)
 	const size_t index = y * VGA_WIDTH + x;
 	terminal_buffer[index] = vga_entry(c, color);
 }
+
+void terminal_putentryat(uint16_t entry, size_t x, size_t y) 
+{
+	const size_t index = y * VGA_WIDTH + x;
+	terminal_buffer[index] = entry;
+}
+
+uint16_t terminal_getentryat(size_t x, size_t y){
+    const size_t index = y * VGA_WIDTH + x;
+	return terminal_buffer[index];
+}
+
+void terminal_scrollDown(){
+    for(int x = 0; x < VGA_WIDTH; x++){
+        for(int y = 1; y < VGA_HEIGHT; y++){
+            terminal_putentryat(terminal_getentryat(x, y), x, y-1);
+            if(y == VGA_HEIGHT-1){
+                terminal_putentryat(' ', terminal_color, x, y);
+            }
+        }
+    }
+    terminal_row--;
+}
  
 void terminal_putchar(char c) 
 {
@@ -120,15 +143,16 @@ void terminal_putchar(char c)
                 terminal_putentryat(' ', terminal_color, terminal_column, terminal_row);
             }
             terminal_column = 0;
-            if (++terminal_row == VGA_HEIGHT)
-                terminal_row = 0;
+            if (++terminal_row == VGA_HEIGHT){
+                terminal_scrollDown();
+            }
             break;
         default:
             terminal_putentryat(c, terminal_color, terminal_column, terminal_row);
             if (++terminal_column == VGA_WIDTH) {
                 terminal_column = 0;
                 if (++terminal_row == VGA_HEIGHT)
-                    terminal_row = 0;
+                    terminal_scrollDown();
             }
 	
 	};
@@ -243,25 +267,61 @@ void StartSystem(){
 
 char Command[512];
 uint8_t commandLength;
+PeripheralComponentInterconnectController* pci;
 
-
-void HandleCommand(const char* command, uint8_t commandLength){
-    if(command == "ping"){
-        terminal_writestring("pong!\n");
-    }else{
-        terminal_writestring("Unrecognized Command!\n");
+bool strcomp(const char* one, const char* two){
+    for(int i = 0; one[i] != '\0' || two[i] != '\0'; i++){
+        if(one[i] != two[i]){
+            return false;
+        }
     }
+        
+    return true;
 }
 
+uint64_t lastTime = 0;
+bool cursor;
+
+void HandleCommand(const char* command, uint8_t commandLength){
+    if(strcomp(command, "ping")){
+        terminal_writestring("pong!\n");
+    }else if(strcomp(command, "lspci")){
+        pci->ListDevices();
+    }else if(strcomp(command, "time")){
+        printDecimal(time);
+        terminal_writestring("\n");
+    }else if(strcomp(command, "lasttime")){
+        printDecimal(lastTime);
+        terminal_writestring("\n");
+    }else{
+        terminal_writestring("Unrecognized Command: ");
+        terminal_writestring(command);
+        terminal_writestring("!\n");
+    }
+}
 
 void Shell(){
     
     DriverManager* driverManager = new DriverManager();
-    PeripheralComponentInterconnectController* pci = new PeripheralComponentInterconnectController();
+    pci = new PeripheralComponentInterconnectController();
     pci->SelectDrivers(driverManager);
+    terminal_writestring(">");
+    
+    cursor = false;
     
     while(1){
-    /*    Event* e = EventManager::activeEventManager->pollEvent(EventType::EVENT_KEYBOARD);
+        
+        if(time-lastTime >= 500){
+        lastTime = time;
+        if(cursor){
+            terminal_putentryat(' ', terminal_color, terminal_column, terminal_row);
+        }else{
+            terminal_putentryat('_', terminal_color, terminal_column, terminal_row);
+        }
+        cursor = !cursor;
+    }
+        
+        Event* e = EventManager::activeEventManager->pollEvent(EventType::EVENT_KEYBOARD);
         if(e != nullptr){
             KeyEvent* keyevent = (KeyEvent*)e->data;
             if(keyevent->press){
@@ -277,6 +337,9 @@ void Shell(){
                                 }
                             }
                         }
+                        cursor = true;
+                        terminal_putentryat('_', terminal_color, terminal_column-1, terminal_row);
+                        lastTime = time;
                         break;
                     case VK_ENTER:
                     {
@@ -286,17 +349,28 @@ void Shell(){
                             trimmedCommand[i] = Command[i];
                         }
                         HandleCommand(trimmedCommand, commandLength);
+                        terminal_writestring(">");
                         commandLength = 0;
+                        cursor = true;
+                        terminal_putentryat('_', terminal_color, terminal_column, terminal_row);
+                        lastTime = time;
+                        
                     }
                         break;
                     default:
-                        terminal_putchar(keyevent->key);
-                        Command[commandLength] = keyevent->key;
-                        commandLength++;
+                        if(keyevent->key != '\0'){
+                            terminal_putchar(keyevent->key);
+                            Command[commandLength] = keyevent->key;
+                            commandLength++;
+                            cursor = true;
+                            terminal_putentryat('_', terminal_color, terminal_column, terminal_row);
+                            lastTime = time;
+                        }
                         break;
                 }
+                
             }
-        }*/
+        }
     }
 }
 extern "C" void kernel_main(void) 

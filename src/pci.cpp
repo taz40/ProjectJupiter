@@ -55,7 +55,25 @@ void PeripheralComponentInterconnectController::SelectDrivers(DriverManager* dri
             for(int function = 0; function < numfunctions; function++){
                 PeripheralComponentInterconnectDeviceDescriptor descriptor = GetDeviceDescriptor(bus, device, function);
                 if(descriptor.vendor_id == 0x00 || descriptor.vendor_id == 0xFFFF){
-                    break;
+                    continue;
+                }
+                
+                
+                
+                
+            }
+        }
+    }
+}
+
+void PeripheralComponentInterconnectController::ListDevices(){
+    for(int bus = 0; bus < 8; bus++){
+        for(int device = 0; device < 32; device++){
+            int numfunctions = DevicehasFunctions(bus, device) ? 8 : 1;
+            for(int function = 0; function < numfunctions; function++){
+                PeripheralComponentInterconnectDeviceDescriptor descriptor = GetDeviceDescriptor(bus, device, function);
+                if(descriptor.vendor_id == 0x00 || descriptor.vendor_id == 0xFFFF){
+                    continue;
                 }
                 
                 terminal_writestring("PCI BUS ");

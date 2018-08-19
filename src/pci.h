@@ -40,6 +40,7 @@ public:
     bool DevicehasFunctions(uint16_t bus, uint16_t device);
     
     void SelectDrivers(DriverManager* drivermanager);
+    void ListDevices();
     
     PeripheralComponentInterconnectDeviceDescriptor GetDeviceDescriptor(uint16_t bus, uint16_t device, uint16_t function);
 };
