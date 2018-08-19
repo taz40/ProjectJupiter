@@ -4,6 +4,7 @@
 #include "types.h"
 #include "interrupts.h"
 #include "port.h"
+#include "driver.h"
 
 enum KeyCode{
     VK_NONE,
@@ -146,7 +147,7 @@ struct KeyEvent{
     bool scroll;
 };
 
-class KeyboardDriver : public InterruptHandler{
+class KeyboardDriver : public InterruptHandler, public Driver{
     Port8BitSlow dataport;
     Port8BitSlow commandport;
     bool numLock;

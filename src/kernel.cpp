@@ -287,12 +287,6 @@ void HandleCommand(const char* command, uint8_t commandLength){
         terminal_writestring("pong!\n");
     }else if(strcomp(command, "lspci")){
         pci->ListDevices();
-    }else if(strcomp(command, "time")){
-        printDecimal(time);
-        terminal_writestring("\n");
-    }else if(strcomp(command, "lasttime")){
-        printDecimal(lastTime);
-        terminal_writestring("\n");
     }else{
         terminal_writestring("Unrecognized Command: ");
         terminal_writestring(command);
@@ -300,18 +294,23 @@ void HandleCommand(const char* command, uint8_t commandLength){
     }
 }
 
+
+InterruptManager* interrupts;
+
 void Shell(){
-    
     DriverManager* driverManager = new DriverManager();
+    KeyboardDriver* keyboard = new KeyboardDriver(interrupts);
+    driverManager->AddDriver(keyboard);
     pci = new PeripheralComponentInterconnectController();
     pci->SelectDrivers(driverManager);
+    driverManager->ActivateAll();
     terminal_writestring(">");
     
     cursor = false;
     
     while(1){
         
-        if(time-lastTime >= 500){
+        if(time-lastTime >= 250){
         lastTime = time;
         if(cursor){
             terminal_putentryat(' ', terminal_color, terminal_column, terminal_row);
@@ -328,6 +327,7 @@ void Shell(){
                 switch(keyevent->keycode){
                     case VK_BACKSPACE:
                         if(commandLength != 0){
+                            terminal_putentryat(' ', terminal_color, terminal_column, terminal_row);
                             terminal_putentryat(' ', terminal_color, --terminal_column, terminal_row);
                             commandLength--;
                             if(terminal_column < 0){
@@ -338,7 +338,7 @@ void Shell(){
                             }
                         }
                         cursor = true;
-                        terminal_putentryat('_', terminal_color, terminal_column-1, terminal_row);
+                        terminal_putentryat('_', terminal_color, terminal_column, terminal_row);
                         lastTime = time;
                         break;
                     case VK_ENTER:
@@ -348,6 +348,7 @@ void Shell(){
                         for(int i = 0; i < commandLength; i++){
                             trimmedCommand[i] = Command[i];
                         }
+                        trimmedCommand[commandLength] = '\0';
                         HandleCommand(trimmedCommand, commandLength);
                         terminal_writestring(">");
                         commandLength = 0;
@@ -358,7 +359,7 @@ void Shell(){
                     }
                         break;
                     default:
-                        if(keyevent->key != '\0'){
+                        if(keyevent->key != '\0' && keyevent->key != '\n'){
                             terminal_putchar(keyevent->key);
                             Command[commandLength] = keyevent->key;
                             commandLength++;
@@ -407,8 +408,7 @@ extern "C" void kernel_main(void)
     taskManager->AddTask(task1);
     
     printlnDebugSerial("Initializing IDT");
-    InterruptManager* interrupts = new InterruptManager((uint16_t)0x20, gdt, taskManager);
-    KeyboardDriver* keyboard = new KeyboardDriver(interrupts);
+    interrupts = new InterruptManager((uint16_t)0x20, gdt, taskManager);
     interrupts->Activate();
 
     
