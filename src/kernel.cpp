@@ -239,6 +239,62 @@ void StartSystem(){
     system->Start();
 }
 
+char Command[512];
+uint8_t commandLength;
+
+bool compairStrings(char[] one, char[] two){
+    
+}
+
+void HandleCommand(const char* command, uint8_t commandLength){
+    if(command == "ping"){
+        terminal_writestring("pong!\n");
+    }else{
+        terminal_writestring("Unrecognized Command!\n");
+    }
+}
+
+
+void Shell(){
+    while(1){
+        Event* e = EventManager::activeEventManager->pollEvent(EventType::EVENT_KEYBOARD);
+        if(e != nullptr){
+            KeyEvent* keyevent = (KeyEvent*)e->data;
+            if(keyevent->press){
+                switch(keyevent->keycode){
+                    case VK_BACKSPACE:
+                        if(commandLength != 0){
+                            terminal_putentryat(' ', terminal_color, --terminal_column, terminal_row);
+                            commandLength--;
+                            if(terminal_column < 0){
+                                terminal_column = VGA_WIDTH-1;
+                                if(--terminal_row < 0){
+                                    terminal_row = 0;
+                                }
+                            }
+                        }
+                        break;
+                    case VK_ENTER:
+                    {
+                        terminal_putchar(keyevent->key);
+                        char trimmedCommand[commandLength];
+                        for(int i = 0; i < commandLength; i++){
+                            trimmedCommand[i] = Command[i];
+                        }
+                        HandleCommand(trimmedCommand, commandLength);
+                        commandLength = 0;
+                    }
+                        break;
+                    default:
+                        terminal_putchar(keyevent->key);
+                        Command[commandLength] = keyevent->key;
+                        commandLength++;
+                        break;
+                }
+            }
+        }
+    }
+}
 extern "C" void kernel_main(void) 
 {
 	/* Initialize terminal interface */
@@ -269,7 +325,7 @@ extern "C" void kernel_main(void)
         
     EventManager* eventManager = new EventManager();
     TaskManager* taskManager = new TaskManager();
-    Task* task1 = new Task(gdt, StartSystem);
+    Task* task1 = new Task(gdt, Shell);
     taskManager->AddTask(task1);
     
     printlnDebugSerial("Initializing IDT");
