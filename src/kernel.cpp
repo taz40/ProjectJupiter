@@ -6,6 +6,8 @@
 #include "multitasking.h"
 #include "Events.h"
 #include "System.h"
+#include "driver.h"
+#include "pci.h"
  
 /* Check if the compiler thinks we are targeting the wrong operating system. */
 #if defined(__linux__)
@@ -254,10 +256,12 @@ void HandleCommand(const char* command, uint8_t commandLength){
 
 void Shell(){
     
-    
+    DriverManager* driverManager = new DriverManager();
+    PeripheralComponentInterconnectController* pci = new PeripheralComponentInterconnectController();
+    pci->SelectDrivers(driverManager);
     
     while(1){
-        Event* e = EventManager::activeEventManager->pollEvent(EventType::EVENT_KEYBOARD);
+    /*    Event* e = EventManager::activeEventManager->pollEvent(EventType::EVENT_KEYBOARD);
         if(e != nullptr){
             KeyEvent* keyevent = (KeyEvent*)e->data;
             if(keyevent->press){
@@ -292,7 +296,7 @@ void Shell(){
                         break;
                 }
             }
-        }
+        }*/
     }
 }
 extern "C" void kernel_main(void) 
