@@ -256,8 +256,11 @@ void HandleCommand(const char* command, uint8_t commandLength){
 
 
 void Shell(){
+    
+    
+    
     while(1){
-        Event* e = EventManager::activeEventManager->pollEvent(EventType::EVENT_KEYBOARD);
+        /*Event* e = EventManager::activeEventManager->pollEvent(EventType::EVENT_KEYBOARD);
         if(e != nullptr){
             KeyEvent* keyevent = (KeyEvent*)e->data;
             if(keyevent->press){
@@ -292,7 +295,7 @@ void Shell(){
                         break;
                 }
             }
-        }
+        }*/
     }
 }
 extern "C" void kernel_main(void) 
