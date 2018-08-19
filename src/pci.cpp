@@ -86,6 +86,10 @@ void PeripheralComponentInterconnectController::ListDevices(){
                 printHex(descriptor.vendor_id);
                 terminal_writestring(", DEVICE ");
                 printHex(descriptor.device_id);
+                terminal_writestring(", CLASS ");
+                printHex(descriptor.class_id);
+                terminal_writestring(", SUBCLASS ");
+                printHex(descriptor.subclass_id);
                 terminal_writestring("\n");
                 
                 
