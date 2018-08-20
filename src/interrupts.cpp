@@ -92,6 +92,8 @@ programmableInterruptControllerSlaveDataPort(0xA1){
     SetInterruptDescriptorTableEntry(hardwareInterruptOffset + 0x0E, CodeSegment, &HandleInterruptRequest0x0E, 0, IDT_INTERRUPT_GATE);
     SetInterruptDescriptorTableEntry(hardwareInterruptOffset + 0x0F, CodeSegment, &HandleInterruptRequest0x0F, 0, IDT_INTERRUPT_GATE);
     
+    SetInterruptDescriptorTableEntry(hardwareInterruptOffset + 0x2C, CodeSegment, &HandleInterruptRequest0x2C, 0, IDT_INTERRUPT_GATE);
+    
     programmableInterruptControllerMasterCommandPort.Write(0x11);
     programmableInterruptControllerSlaveCommandPort.Write(0x11);
     
@@ -148,11 +150,10 @@ uint32_t InterruptManager::DoHandleInterrupt(uint8_t interrupt, uint32_t esp){
         printDebugSerial("Unhandled Interrupt: 0x");
         printHexSerial(interrupt);
         printlnDebugSerial("");
-    }else if(interrupt == hardwareInterruptOffset){
-        time += 10;
     }
     
     if(interrupt == hardwareInterruptOffset){
+        time += 10;
         esp = (uint32_t)taskManager->Schedule((CPUState*)esp);
     }
     

@@ -61,6 +61,7 @@ HandleInterruptRequest 0x0C
 HandleInterruptRequest 0x0D
 HandleInterruptRequest 0x0E
 HandleInterruptRequest 0x0F
+HandleInterruptRequest 0x2C
 HandleInterruptRequest 0x31
 
 int_bottom:

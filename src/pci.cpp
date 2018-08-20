@@ -1,4 +1,6 @@
 #include "pci.h"
+#include "keyboard.h"
+#include "mouse.h"
 
 void printHex(uint32_t hex);
 void terminal_writestring(const char* data);
@@ -48,7 +50,11 @@ bool PeripheralComponentInterconnectController::DevicehasFunctions(uint16_t bus,
     return Read(bus, device, 0, 0x0E) & (1 << 7);
 }
 
-void PeripheralComponentInterconnectController::SelectDrivers(DriverManager* drivermanager){
+void PeripheralComponentInterconnectController::SelectDrivers(DriverManager* drivermanager, InterruptManager* interrupts){
+    
+    drivermanager->AddDriver(new MouseDriver(interrupts));
+    drivermanager->AddDriver(new KeyboardDriver(interrupts));
+    
     for(int bus = 0; bus < 8; bus++){
         for(int device = 0; device < 32; device++){
             int numfunctions = DevicehasFunctions(bus, device) ? 8 : 1;

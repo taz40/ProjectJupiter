@@ -63,6 +63,7 @@ protected:
     static void HandleInterruptRequest0x0D();
     static void HandleInterruptRequest0x0E();
     static void HandleInterruptRequest0x0F();
+    static void HandleInterruptRequest0x2C();
     static void HandleInterruptRequest0x31();
     
     static void HandleException0x00();

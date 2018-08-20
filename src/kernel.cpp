@@ -8,6 +8,7 @@
 #include "System.h"
 #include "driver.h"
 #include "pci.h"
+#include "mouse.h"
  
 /* Check if the compiler thinks we are targeting the wrong operating system. */
 #if defined(__linux__)
@@ -299,26 +300,26 @@ InterruptManager* interrupts;
 
 void Shell(){
     DriverManager* driverManager = new DriverManager();
-    KeyboardDriver* keyboard = new KeyboardDriver(interrupts);
-    driverManager->AddDriver(keyboard);
     pci = new PeripheralComponentInterconnectController();
-    pci->SelectDrivers(driverManager);
+    pci->SelectDrivers(driverManager, interrupts);
     driverManager->ActivateAll();
     terminal_writestring(">");
+    
+    
     
     cursor = false;
     
     while(1){
         
         if(time-lastTime >= 250){
-        lastTime = time;
-        if(cursor){
-            terminal_putentryat(' ', terminal_color, terminal_column, terminal_row);
-        }else{
-            terminal_putentryat('_', terminal_color, terminal_column, terminal_row);
-        }
-        cursor = !cursor;
-    }
+            lastTime = time;
+            if(cursor){
+                terminal_putentryat(' ', terminal_color, terminal_column, terminal_row);
+            }else{
+                terminal_putentryat('_', terminal_color, terminal_column, terminal_row);
+            }
+            cursor = !cursor;
+        }   
         
         Event* e = EventManager::activeEventManager->pollEvent(EventType::EVENT_KEYBOARD);
         if(e != nullptr){

@@ -3,6 +3,7 @@
 
 #include "port.h"
 #include "driver.h"
+#include "interrupts.h"
 
 class PeripheralComponentInterconnectDeviceDescriptor{
 public:
@@ -39,7 +40,7 @@ public:
     void Write(uint16_t bus, uint16_t device, uint16_t function, uint32_t regtisteroffset, uint32_t value);
     bool DevicehasFunctions(uint16_t bus, uint16_t device);
     
-    void SelectDrivers(DriverManager* drivermanager);
+    void SelectDrivers(DriverManager* drivermanager, InterruptManager* interrupts);
     void ListDevices();
     
     PeripheralComponentInterconnectDeviceDescriptor GetDeviceDescriptor(uint16_t bus, uint16_t device, uint16_t function);
