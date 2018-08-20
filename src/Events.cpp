@@ -9,6 +9,7 @@ EventManager::EventManager(){
     queue = new Event[256];
     eventNum = 0;
     QueueInUse = false;
+    queueSize = 256;
 }
 
 EventManager::~EventManager(){
@@ -19,6 +20,17 @@ EventManager::~EventManager(){
 void EventManager::AddEvent(Event event){
     while(QueueInUse);
     QueueInUse = true;
+    terminal_writestring("Event Num: ");
+    printDecimal(eventNum);
+    terminal_writestring(", Queue Size: ");
+    printDecimal(queueSize);
+    terminal_writestring("\n");
+    if(eventNum == queueSize){
+        for(int x = 1; x < eventNum; x++){
+            queue[x-1] = queue[x]; 
+        }
+        eventNum--;
+    }
     queue[eventNum] = event;
     eventNum++;
     QueueInUse = false;

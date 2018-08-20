@@ -6,6 +6,17 @@
 #include "port.h"
 #include "driver.h"
 
+struct MouseEvent{
+    int8_t Movement_X;
+    int8_t Movement_Y;
+    int8_t scroll;
+    bool button1;
+    bool button2;
+    bool button3;
+    bool button4;
+    bool button5;
+};
+
 class MouseDriver : public InterruptHandler, public Driver{
     Port8BitSlow dataport;
     Port8BitSlow commandport;

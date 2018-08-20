@@ -21,6 +21,7 @@ private:
     Event* queue;
     uint8_t eventNum;
     bool QueueInUse;
+    uint8_t queueSize;
 public:
     static EventManager* activeEventManager;
     EventManager();

@@ -297,6 +297,8 @@ void HandleCommand(const char* command, uint8_t commandLength){
 
 
 InterruptManager* interrupts;
+int8_t x = 40;
+int8_t y = 12;
 
 void Shell(){
     DriverManager* driverManager = new DriverManager();
@@ -304,9 +306,11 @@ void Shell(){
     pci->SelectDrivers(driverManager, interrupts);
     driverManager->ActivateAll();
     terminal_writestring(">");
-    
-    
-    
+   /* 
+    terminal_buffer[80*y+x] = ((terminal_buffer[80*y+x] & 0xF000) >> 4)
+                            | ((terminal_buffer[80*y+x] & 0x0F00) << 4)
+                            | ((terminal_buffer[80*y+x] & 0x00FF));
+    */
     cursor = false;
     
     while(1){
@@ -372,6 +376,24 @@ void Shell(){
                 }
                 
             }
+        }
+        
+        e = EventManager::activeEventManager->pollEvent(EventType::EVENT_MOUSE);
+        if(e != nullptr){
+            MouseEvent* mouseevent = (MouseEvent*)e->data;
+            terminal_buffer[80*y+x] = ((terminal_buffer[80*y+x] & 0xF000) >> 4)
+                            | ((terminal_buffer[80*y+x] & 0x0F00) << 4)
+                            | ((terminal_buffer[80*y+x] & 0x00FF));
+            x += mouseevent->Movement_X;
+            y += mouseevent->Movement_Y;
+            if(x < 0) x = 0;
+            if(x >= VGA_WIDTH) x = VGA_WIDTH-1;
+            if(y < 0) y = 0;
+            if(y >= VGA_HEIGHT) y = VGA_HEIGHT-1;
+            
+            terminal_buffer[80*y+x] = ((terminal_buffer[80*y+x] & 0xF000) >> 4)
+                            | ((terminal_buffer[80*y+x] & 0x0F00) << 4)
+                            | ((terminal_buffer[80*y+x] & 0x00FF));
         }
     }
 }
