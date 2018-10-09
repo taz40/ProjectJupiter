@@ -1,15 +1,16 @@
 #include "Events.h"
 void terminal_writestring(const char* data);
 void printDecimal(uint32_t dec);
+void printHex(uint32_t hex);
 
 EventManager* EventManager::activeEventManager = 0;
 
 EventManager::EventManager(){
     activeEventManager = this;
-    queue = new Event[256];
+    queue = new Event[255];
     eventNum = 0;
     QueueInUse = false;
-    queueSize = 256;
+    queueSize = 255;
 }
 
 EventManager::~EventManager(){
@@ -20,11 +21,6 @@ EventManager::~EventManager(){
 void EventManager::AddEvent(Event event){
     while(QueueInUse);
     QueueInUse = true;
-    terminal_writestring("Event Num: ");
-    printDecimal(eventNum);
-    terminal_writestring(", Queue Size: ");
-    printDecimal(queueSize);
-    terminal_writestring("\n");
     if(eventNum == queueSize){
         for(int x = 1; x < eventNum; x++){
             queue[x-1] = queue[x]; 

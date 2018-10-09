@@ -17,7 +17,7 @@ public:
 };
 
 class EventManager{
-private:
+public:
     Event* queue;
     uint8_t eventNum;
     bool QueueInUse;

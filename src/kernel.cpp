@@ -110,10 +110,10 @@ void terminal_putentryat(char c, uint8_t color, size_t x, size_t y)
 	terminal_buffer[index] = vga_entry(c, color);
 }
 
-void terminal_putentryat(uint16_t entry, size_t x, size_t y) 
+void terminal_putentryat(uint16_t LetterEntry, uint16_t ColorEntry, size_t x, size_t y) 
 {
 	const size_t index = y * VGA_WIDTH + x;
-	terminal_buffer[index] = entry;
+	terminal_buffer[index] = (LetterEntry & 0x00FF) | (ColorEntry & 0xFF00);
 }
 
 uint16_t terminal_getentryat(size_t x, size_t y){
@@ -124,7 +124,7 @@ uint16_t terminal_getentryat(size_t x, size_t y){
 void terminal_scrollDown(){
     for(int x = 0; x < VGA_WIDTH; x++){
         for(int y = 1; y < VGA_HEIGHT; y++){
-            terminal_putentryat(terminal_getentryat(x, y), x, y-1);
+            terminal_putentryat(terminal_getentryat(x, y), terminal_getentryat(x, y-1), x, y-1);
             if(y == VGA_HEIGHT-1){
                 terminal_putentryat(' ', terminal_color, x, y);
             }
@@ -306,11 +306,11 @@ void Shell(){
     pci->SelectDrivers(driverManager, interrupts);
     driverManager->ActivateAll();
     terminal_writestring(">");
-   /* 
+   
     terminal_buffer[80*y+x] = ((terminal_buffer[80*y+x] & 0xF000) >> 4)
                             | ((terminal_buffer[80*y+x] & 0x0F00) << 4)
                             | ((terminal_buffer[80*y+x] & 0x00FF));
-    */
+    
     cursor = false;
     
     while(1){
