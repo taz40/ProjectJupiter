@@ -64,7 +64,9 @@ void PeripheralComponentInterconnectController::SelectDrivers(DriverManager* dri
                     continue;
                 }
                 
-                
+                if(descriptor.class_id == 0x01 && descriptor.subclass_id == 0x01){
+                    //printHex((Read(bus, device, function, 0)  << 4));
+                }
                 
                 
             }
@@ -93,9 +95,17 @@ void PeripheralComponentInterconnectController::ListDevices(){
                 terminal_writestring(", DEVICE ");
                 printHex(descriptor.device_id);
                 terminal_writestring(", CLASS ");
-                printHex(descriptor.class_id);
+                if(descriptor.class_id == 0x01){
+                    terminal_writestring("mass storage controller");
+                }else{
+                    printHex(descriptor.class_id);
+                }
                 terminal_writestring(", SUBCLASS ");
-                printHex(descriptor.subclass_id);
+                if(descriptor.class_id == 0x01){
+                    terminal_writestring("IDE interface");
+                }else{
+                    printHex(descriptor.subclass_id);
+                }
                 terminal_writestring("\n");
                 
                 

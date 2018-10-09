@@ -7,10 +7,10 @@ EventManager* EventManager::activeEventManager = 0;
 
 EventManager::EventManager(){
     activeEventManager = this;
-    queue = new Event[255];
+    queueSize = 255;
+    queue = new Event[queueSize];
     eventNum = 0;
     QueueInUse = false;
-    queueSize = 255;
 }
 
 EventManager::~EventManager(){
