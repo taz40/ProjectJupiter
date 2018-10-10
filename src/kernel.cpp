@@ -289,6 +289,20 @@ void HandleCommand(const char* command, uint8_t commandLength){
         terminal_writestring("pong!\n");
     }else if(strcomp(command, "lspci")){
         pci->ListDevices();
+    }else if(strcomp(command, "lsdisk")){
+        AdvancedTechnologyAttachment* ata0m = new AdvancedTechnologyAttachment(0x1F0, true);
+        terminal_writestring("ATA Primary Master: ");
+        ata0m->Identify();
+        AdvancedTechnologyAttachment* ata0s = new AdvancedTechnologyAttachment(0x1F0, false);
+        terminal_writestring("ATA Primary Slave: ");
+        ata0s->Identify();
+        
+        AdvancedTechnologyAttachment* ata1m = new AdvancedTechnologyAttachment(0x170, true);
+        terminal_writestring("ATA Secondary Master: ");
+        ata1m->Identify();
+        AdvancedTechnologyAttachment* ata1s = new AdvancedTechnologyAttachment(0x170, false);
+        terminal_writestring("ATA Secondary Slave: ");
+        ata1s->Identify();
     }else{
         terminal_writestring("Unrecognized Command: ");
         terminal_writestring(command);
@@ -302,21 +316,6 @@ int8_t x = 40;
 int8_t y = 12;
 
 void Shell(){
-    
-    AdvancedTechnologyAttachment* ata0m = new AdvancedTechnologyAttachment(0x1F0, true);
-    terminal_writestring("ATA Primary Master: ");
-    ata0m->Identify();
-    AdvancedTechnologyAttachment* ata0s = new AdvancedTechnologyAttachment(0x1F0, false);
-    terminal_writestring("ATA Primary Slave: ");
-    ata0s->Identify();
-    
-    AdvancedTechnologyAttachment* ata1m = new AdvancedTechnologyAttachment(0x170, true);
-    terminal_writestring("ATA Secondary Master: ");
-    ata1m->Identify();
-    AdvancedTechnologyAttachment* ata1s = new AdvancedTechnologyAttachment(0x170, false);
-    terminal_writestring("ATA Secondary Slave: ");
-    ata1s->Identify();
-    
     DriverManager* driverManager = new DriverManager();
     pci = new PeripheralComponentInterconnectController();
     pci->SelectDrivers(driverManager, interrupts);

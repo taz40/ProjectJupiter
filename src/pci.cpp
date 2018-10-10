@@ -97,13 +97,67 @@ void PeripheralComponentInterconnectController::ListDevices(){
                 terminal_writestring(", CLASS ");
                 if(descriptor.class_id == 0x01){
                     terminal_writestring("mass storage controller");
+                    terminal_writestring(", SUBCLASS ");
+                    if(descriptor.subclass_id == 0x01){
+                        terminal_writestring("IDE interface");
+                    }else{
+                        printHex(descriptor.subclass_id);
+                    }
+                }else if(descriptor.class_id == 0x06){
+                    terminal_writestring("bridge");
+                    terminal_writestring(", SUBCLASS ");
+                    if(descriptor.subclass_id == 0x00){
+                        terminal_writestring("Host bridge");
+                    }else if(descriptor.subclass_id == 0x01){
+                        terminal_writestring("ISA bridge");
+                    }else if(descriptor.subclass_id == 0x80){
+                        terminal_writestring("bridge");
+                    }else{
+                        printHex(descriptor.subclass_id);
+                    }
+                }else if(descriptor.class_id == 0x03){
+                    terminal_writestring("display controller");
+                    terminal_writestring(", SUBCLASS ");
+                    if(descriptor.subclass_id == 0x00){
+                        terminal_writestring("VGA compatible controller");
+                    }else{
+                        printHex(descriptor.subclass_id);
+                    }
+                }else if(descriptor.class_id == 0x02){
+                    terminal_writestring("network controller");
+                    terminal_writestring(", SUBCLASS ");
+                    if(descriptor.subclass_id == 0x00){
+                        terminal_writestring("Ethernet controller");
+                    }else{
+                        printHex(descriptor.subclass_id);
+                    }
+                }else if(descriptor.class_id == 0x08){
+                    terminal_writestring("generic system peripheral");
+                    terminal_writestring(", SUBCLASS ");
+                    if(descriptor.subclass_id == 0x80){
+                        terminal_writestring("system peripheral");
+                    }else{
+                        printHex(descriptor.subclass_id);
+                    }
+                }else if(descriptor.class_id == 0x04){
+                    terminal_writestring("multimedia controller");
+                    terminal_writestring(", SUBCLASS ");
+                    if(descriptor.subclass_id == 0x01){
+                        terminal_writestring("multimedia audio controller");
+                    }else{
+                        printHex(descriptor.subclass_id);
+                    }
+                }else if(descriptor.class_id == 0x0C){
+                    terminal_writestring("serial bus controller");
+                    terminal_writestring(", SUBCLASS ");
+                    if(descriptor.subclass_id == 0x03){
+                        terminal_writestring("USB controller");
+                    }else{
+                        printHex(descriptor.subclass_id);
+                    }
                 }else{
                     printHex(descriptor.class_id);
-                }
-                terminal_writestring(", SUBCLASS ");
-                if(descriptor.class_id == 0x01){
-                    terminal_writestring("IDE interface");
-                }else{
+                    terminal_writestring(", SUBCLASS ");
                     printHex(descriptor.subclass_id);
                 }
                 terminal_writestring("\n");
