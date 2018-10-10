@@ -18,10 +18,10 @@ protected:
     bool master;
     uint16_t bytesPerSector;
 public:
-    AdvancedTechnologyAttachment(uint16_t portBase, bool master);
+    AdvancedTechnologyAttachment(uint16_t dataPortBase, uint16_t commandPortBase, bool master);
     ~AdvancedTechnologyAttachment();
     
-    void Identify();
+    bool Identify();
     void Read28(uint32_t sectorNumber);
     void Write28(uint32_t sector, uint8_t* data, int count);
     void Flush();

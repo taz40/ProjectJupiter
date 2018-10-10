@@ -5,6 +5,8 @@
 void printHex(uint32_t hex);
 void terminal_writestring(const char* data);
 
+PeripheralComponentInterconnectController* PeripheralComponentInterconnectController::instance = 0;
+
 PeripheralComponentInterconnectDeviceDescriptor::PeripheralComponentInterconnectDeviceDescriptor(){
     
 }
@@ -15,11 +17,11 @@ PeripheralComponentInterconnectDeviceDescriptor::~PeripheralComponentInterconnec
 
 PeripheralComponentInterconnectController::PeripheralComponentInterconnectController()
 :dataPort(0xCFC), commandPort(0xCF8){
-    
+    instance = this;
 }
 
 PeripheralComponentInterconnectController::~PeripheralComponentInterconnectController(){
-    
+    instance = 0;
 }
 
 uint32_t PeripheralComponentInterconnectController::Read(uint16_t bus, uint16_t device, uint16_t function, uint32_t registeroffset){
@@ -64,8 +66,16 @@ void PeripheralComponentInterconnectController::SelectDrivers(DriverManager* dri
                     continue;
                 }
                 
+                Driver* driver = GetDriver(descriptor, interrupts);
+                if(driver != 0)
+                    drivermanager->AddDriver(driver);
+                
+                if(descriptor.vendor_id == 0x00 || descriptor.vendor_id == 0xFFFF){
+                    continue;
+                }
+                
                 if(descriptor.class_id == 0x01 && descriptor.subclass_id == 0x01){
-                    //printHex((Read(bus, device, function, 0)  << 4));
+                    //printHex((uint32_t)GetBaseAddressRegister(bus, device, function, 0).address);
                 }
                 
                 
@@ -186,4 +196,53 @@ PeripheralComponentInterconnectDeviceDescriptor PeripheralComponentInterconnectC
     result.interrupt = Read(bus, device, function, 0x3C);
     
     return result;
+}
+
+BaseAddressRegister PeripheralComponentInterconnectController::GetBaseAddressRegister(uint16_t bus, uint16_t device, uint16_t function, uint16_t bar){
+    BaseAddressRegister result;
+    
+    uint32_t headertype = Read(bus, device, function, 0x0E) & 0x7F;
+    int maxBARs = 6 - (4*headertype);
+    if(bar >= maxBARs)
+        return result;
+    
+    uint32_t bar_value = Read(bus, device, function, 0x10 + 4*bar);
+    result.type = (bar_value & 0x1) ? InputOutput : MemoryMapping;
+    uint32_t temp;
+    
+    if(result.type == MemoryMapping){
+        result.prefetchable = ((bar_value >> 3) & 0x1) == 0x1;
+        switch((bar_value >> 1) & 0x3){
+            case 0x00: //32 bit
+                
+            break;
+            case 0x01: //20 bit
+                
+            break;
+            case 0x02: //64 bit
+                
+            break;
+        }
+    }else{ //InputOutput
+        result.address = (uint8_t*)(bar_value & ~0x3);
+        result.prefetchable = false;
+    }
+    
+    return result;
+}
+
+Driver* PeripheralComponentInterconnectController::GetDriver(PeripheralComponentInterconnectDeviceDescriptor device, InterruptManager* interrupts){
+    switch(device.vendor_id){
+    }
+    switch(device.class_id){
+        case 0x01:
+            switch(device.subclass_id){
+                case 0x01:
+                    ide = new IDEDriver((uint32_t)GetBaseAddressRegister(device.bus, device.device, device.function, 0).address, (uint32_t)GetBaseAddressRegister(device.bus, device.device, device.function, 1).address, (uint32_t)GetBaseAddressRegister(device.bus, device.device, device.function, 2).address, (uint32_t)GetBaseAddressRegister(device.bus, device.device, device.function, 3).address, (uint32_t)GetBaseAddressRegister(device.bus, device.device, device.function, 4).address, interrupts);
+                    return ide;
+                break;
+            }
+        break;
+    }
+    return 0;
 }

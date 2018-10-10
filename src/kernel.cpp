@@ -10,6 +10,7 @@
 #include "pci.h"
 #include "mouse.h"
 #include "ata.h"
+#include "ide.h"
  
 /* Check if the compiler thinks we are targeting the wrong operating system. */
 #if defined(__linux__)
@@ -290,19 +291,7 @@ void HandleCommand(const char* command, uint8_t commandLength){
     }else if(strcomp(command, "lspci")){
         pci->ListDevices();
     }else if(strcomp(command, "lsdisk")){
-        AdvancedTechnologyAttachment* ata0m = new AdvancedTechnologyAttachment(0x1F0, true);
-        terminal_writestring("ATA Primary Master: ");
-        ata0m->Identify();
-        AdvancedTechnologyAttachment* ata0s = new AdvancedTechnologyAttachment(0x1F0, false);
-        terminal_writestring("ATA Primary Slave: ");
-        ata0s->Identify();
-        
-        AdvancedTechnologyAttachment* ata1m = new AdvancedTechnologyAttachment(0x170, true);
-        terminal_writestring("ATA Secondary Master: ");
-        ata1m->Identify();
-        AdvancedTechnologyAttachment* ata1s = new AdvancedTechnologyAttachment(0x170, false);
-        terminal_writestring("ATA Secondary Slave: ");
-        ata1s->Identify();
+        PeripheralComponentInterconnectController::instance->ide->PrintIDEInfo();
     }else{
         terminal_writestring("Unrecognized Command: ");
         terminal_writestring(command);
@@ -322,10 +311,10 @@ void Shell(){
     driverManager->ActivateAll();
     terminal_writestring(">");
    
-    /*terminal_buffer[80*y+x] = ((terminal_buffer[80*y+x] & 0xF000) >> 4)
+    terminal_buffer[80*y+x] = ((terminal_buffer[80*y+x] & 0xF000) >> 4)
                             | ((terminal_buffer[80*y+x] & 0x0F00) << 4)
                             | ((terminal_buffer[80*y+x] & 0x00FF));
-    */
+    
     cursor = false;
     
     while(1){
@@ -393,7 +382,7 @@ void Shell(){
             }
         }
         
-        /*e = EventManager::activeEventManager->pollEvent(EventType::EVENT_MOUSE);
+        e = EventManager::activeEventManager->pollEvent(EventType::EVENT_MOUSE);
         if(e != nullptr){
             MouseEvent* mouseevent = (MouseEvent*)e->data;
             terminal_buffer[80*y+x] = ((terminal_buffer[80*y+x] & 0xF000) >> 4)
@@ -409,7 +398,7 @@ void Shell(){
             terminal_buffer[80*y+x] = ((terminal_buffer[80*y+x] & 0xF000) >> 4)
                             | ((terminal_buffer[80*y+x] & 0x0F00) << 4)
                             | ((terminal_buffer[80*y+x] & 0x00FF));
-        }*/
+        }
     }
 }
 extern "C" void kernel_main(void) 

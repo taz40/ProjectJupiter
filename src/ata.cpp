@@ -5,16 +5,16 @@ void terminal_writestring(const char* data);
 void printDecimal(uint32_t dec);
 void printHex(uint32_t hex);
 
-AdvancedTechnologyAttachment::AdvancedTechnologyAttachment(uint16_t portBase, bool master)
-: dataPort(portBase),
-    errorPort(portBase + 0x1),
-    sectorCountPort(portBase + 0x2),
-    lbaLowPort(portBase + 0x3),
-    lbaMidPort(portBase + 0x4),
-    lbaHighPort(portBase + 0x5),
-    devicePort(portBase + 0x6),
-    commandPort(portBase + 0x7),
-    controlPort(portBase + 0x206){
+AdvancedTechnologyAttachment::AdvancedTechnologyAttachment(uint16_t dataPortBase, uint16_t commandPortBase, bool master)
+: dataPort(dataPortBase),
+    errorPort(dataPortBase + 0x1),
+    sectorCountPort(dataPortBase + 0x2),
+    lbaLowPort(dataPortBase + 0x3),
+    lbaMidPort(dataPortBase + 0x4),
+    lbaHighPort(dataPortBase + 0x5),
+    devicePort(dataPortBase + 0x6),
+    commandPort(dataPortBase + 0x7),
+    controlPort(commandPortBase){
     bytesPerSector = 112;
     this->master = master;
 }
@@ -23,15 +23,15 @@ AdvancedTechnologyAttachment::~AdvancedTechnologyAttachment(){
     
 }
     
-void AdvancedTechnologyAttachment::Identify(){
+bool AdvancedTechnologyAttachment::Identify(){
     devicePort.Write(master ? 0xA0 : 0xB0);
     controlPort.Write(0);
     
     devicePort.Write(0xA0);
     uint8_t status = commandPort.Read();
     if(status == 0xFF){
-        terminal_writestring("No Device\n");
-        return;
+        //terminal_writestring("No Device\n");
+        return false;
     }
     
     devicePort.Write(master ? 0xA0 : 0xB0);
@@ -43,8 +43,8 @@ void AdvancedTechnologyAttachment::Identify(){
     
     status = commandPort.Read();
     if(status == 0x00){
-        terminal_writestring("No Device\n");
-        return;
+        //terminal_writestring("No Device\n");
+        return false;
     }
     
     while(((status & 0x80) == 0x80)
@@ -52,18 +52,18 @@ void AdvancedTechnologyAttachment::Identify(){
         status = commandPort.Read();
     
     if(status & 0x01){
-        terminal_writestring("Error\n");
-        return;
+        //terminal_writestring("Error\n");
+        return false;
     }
     
     for(uint16_t i = 0; i < 256; i++){
         uint16_t data = dataPort.Read();
-        printHex(data);
-        terminal_writestring(" ");
+        //printHex(data);
+        //terminal_writestring(" ");
     }
-    terminal_writestring("\n");
+    //terminal_writestring("\n");
     
-    
+    return true;
     
 }
 
