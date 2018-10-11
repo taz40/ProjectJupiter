@@ -4,6 +4,8 @@
 void printlnDebugSerial(const char* string);
 void printDebugSerial(const char* string);
 void printHexSerial(uint32_t hex);
+void terminal_writestring(const char* string);
+void printHex(uint32_t hex);
 extern uint64_t time;
 
 InterruptHandler::InterruptHandler(InterruptManager* interruptManager, uint8_t InterruptNumber){
@@ -147,9 +149,9 @@ uint32_t InterruptManager::DoHandleInterrupt(uint8_t interrupt, uint32_t esp){
     if(handlers[interrupt] != 0){
         esp = handlers[interrupt]->HandleInterrupt(esp);
     }else if(interrupt != hardwareInterruptOffset){
-        printDebugSerial("Unhandled Interrupt: 0x");
-        printHexSerial(interrupt);
-        printlnDebugSerial("");
+        //terminal_writestring("Unhandled Interrupt: 0x");
+        //printHex(interrupt);
+        //terminal_writestring("\n");
     }
     
     if(interrupt == hardwareInterruptOffset){

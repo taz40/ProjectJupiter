@@ -238,6 +238,7 @@ Driver* PeripheralComponentInterconnectController::GetDriver(PeripheralComponent
         case 0x01:
             switch(device.subclass_id){
                 case 0x01:
+                    printHex((uint16_t)Read(device.bus, device.device, device.function, 0x3C));
                     ide = new IDEDriver((uint32_t)GetBaseAddressRegister(device.bus, device.device, device.function, 0).address, (uint32_t)GetBaseAddressRegister(device.bus, device.device, device.function, 1).address, (uint32_t)GetBaseAddressRegister(device.bus, device.device, device.function, 2).address, (uint32_t)GetBaseAddressRegister(device.bus, device.device, device.function, 3).address, (uint32_t)GetBaseAddressRegister(device.bus, device.device, device.function, 4).address, interrupts);
                     return ide;
                 break;
