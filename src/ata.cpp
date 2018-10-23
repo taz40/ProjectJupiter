@@ -30,7 +30,7 @@ bool AdvancedTechnologyAttachment::Identify(){
     devicePort.Write(0xA0);
     uint8_t status = commandPort.Read();
     if(status == 0xFF){
-        terminal_writestring("No Device\n");
+        //terminal_writestring("No Device\n");
         return false;
     }
     
@@ -43,23 +43,23 @@ bool AdvancedTechnologyAttachment::Identify(){
     
     status = commandPort.Read();
     if(status == 0x00){
-        terminal_writestring("No Device\n");
+        //terminal_writestring("No Device\n");
         return false;
     }
     
-    while(/*((status & 0x80) == 0x80)
-        && ((status & 0x01) != 0x01)*/true){
+    while(((status & 0x80) == 0x80)
+        && ((status & 0x01) != 0x01)){
         status = commandPort.Read();
         //printHex(status);
         if(lbaMidPort.Read() != 0 || lbaHighPort.Read() != 0){
             //terminal_writestring("Not an ATA device\n");
-            //return false;
+            return false;
         }
     }
     
     if(status & 0x01){
         if(lbaMidPort.Read() != 0 || lbaHighPort.Read() != 0){
-            terminal_writestring("Not an ATA device\n");
+            //terminal_writestring("Not an ATA device\n");
             return false;
         }
         terminal_writestring("Error\n");
@@ -71,7 +71,7 @@ bool AdvancedTechnologyAttachment::Identify(){
         //printHex(data);
         //terminal_writestring(" ");
     }
-    terminal_writestring("OK\n");
+    //terminal_writestring("OK\n");
     
     return true;
     
