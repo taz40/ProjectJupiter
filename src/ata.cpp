@@ -134,7 +134,14 @@ void AdvancedTechnologyAttachment::PrintInfo(){
     }
     terminal_writestring("LBA28 Sectors: ");
     printDecimal(lba28Sectors);
-    terminal_writestring("\nLBA48 Sectors: ");
+    terminal_writestring(" (");
+    uint64_t bytes = (uint64_t)lba28Sectors * (uint64_t)bytesPerSector;
+    printDecimal(bytes / 1024 / 1024 / 1024);
+    terminal_writestring("GB)\n");
+    terminal_writestring("LBA48 Sectors: ");
     printDecimal(lba48Sectors);
-    terminal_writestring("\n");
+    terminal_writestring(" (");
+    uint64_t bytes2 = (uint64_t)lba48Sectors * (uint64_t)bytesPerSector;
+    printDecimal(bytes2 / 1073741824);
+    terminal_writestring("GB)\n");
 }

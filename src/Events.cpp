@@ -1,6 +1,6 @@
 #include "Events.h"
 void terminal_writestring(const char* data);
-void printDecimal(uint32_t dec);
+void printDecimal(uint64_t dec);
 void printHex(uint32_t hex);
 
 EventManager* EventManager::activeEventManager = 0;

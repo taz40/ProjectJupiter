@@ -12,7 +12,7 @@ obj/%.o: src/%.s
 	
 kernel.bin: Link.ld $(objects)
 	echo $(objects)
-	i686-elf-gcc -T $< -o $@ -nostdlib -lgcc $(objects)
+	i686-elf-gcc -T $< -o $@ -nostdlib -lgcc $(objects) 
 	
 projectJupiter.iso: kernel.bin
 	mkdir iso

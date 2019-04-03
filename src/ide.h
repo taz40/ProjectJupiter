@@ -13,6 +13,7 @@ public:
     ~IDEDriver();
     
     void PrintIDEInfo();
+    void PrintAllIDEInfo();
 };
 
 #endif

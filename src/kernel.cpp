@@ -292,6 +292,8 @@ void HandleCommand(const char* command, uint8_t commandLength){
         pci->ListDevices();
     }else if(strcomp(command, "lsdisk")){
         PeripheralComponentInterconnectController::instance->ide->PrintIDEInfo();
+    }else if(strcomp(command, "lsdisk --all")){
+        PeripheralComponentInterconnectController::instance->ide->PrintAllIDEInfo();
     }else{
         terminal_writestring("Unrecognized Command: ");
         terminal_writestring(command);

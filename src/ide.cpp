@@ -42,3 +42,15 @@ void IDEDriver::PrintIDEInfo(){
         
     }
 }
+
+void IDEDriver::PrintAllIDEInfo(){
+    for(int i = 0; i < 4; i++){
+        if(disks[i] == 0)
+            continue;
+        terminal_writestring("Drive");
+        printDecimal(i);
+        terminal_writestring("\n");
+        disks[i]->PrintInfo();
+        
+    }
+}
