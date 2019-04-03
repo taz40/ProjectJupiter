@@ -83,12 +83,14 @@ bool AdvancedTechnologyAttachment::Identify(){
         terminal_writestring("Device Error\n");
         return false;
     }
-    
+
     for(uint16_t i = 0; i < 256; i++){
         uint16_t data = dataPort.Read();
-        printHex(data);
-        terminal_writestring(" ");
+        identifyData[i] = data;
+        //printHex(data);
+        //terminal_writestring(" ");
     }
+    printHex((identifyData[83] & 0x400) >> 10);
     terminal_writestring("OK\n");
     
     return true;

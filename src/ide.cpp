@@ -6,24 +6,24 @@ void printDecimal(uint32_t dec);
 
 IDEDriver::IDEDriver(uint32_t bar0, uint32_t bar1, uint32_t bar2, uint32_t bar3, uint32_t bar4, InterruptManager* interupts){
 
-    AdvancedTechnologyAttachment* disk = new AdvancedTechnologyAttachment( bar0 == 0x00 || bar0 == 0x01 ? 0x1F0 : bar0, bar1 == 0x00 || bar1 == 0x01 ? 0x3F6 : bar1, true);
-    if(disk->Identify()){
-        disks[0] = disk;
+    AdvancedTechnologyAttachment* disk1 = new AdvancedTechnologyAttachment( bar0 == 0x00 || bar0 == 0x01 ? 0x1F0 : bar0, bar1 == 0x00 || bar1 == 0x01 ? 0x3F6 : bar1, true);
+    if(disk1->Identify()){
+        disks[0] = disk1;
     }
 
-    disk = new AdvancedTechnologyAttachment( bar0 == 0x00 || bar0 == 0x01 ? 0x1F0 : bar0, bar1 == 0x00 || bar1 == 0x01 ? 0x3F6 : bar1, false);
-    if(disk->Identify()){
-        disks[1] = disk;
+    AdvancedTechnologyAttachment* disk2 = new AdvancedTechnologyAttachment( bar0 == 0x00 || bar0 == 0x01 ? 0x1F0 : bar0, bar1 == 0x00 || bar1 == 0x01 ? 0x3F6 : bar1, false);
+    if(disk2->Identify()){
+        disks[1] = disk2;
     }
 
-    disk = new AdvancedTechnologyAttachment( bar2 == 0x00 || bar2 == 0x01 ? 0x170 : bar2, bar3 == 0x00 || bar3 == 0x01 ? 0x376 : bar3, true);
-    if(disk->Identify()){
-        disks[2] = disk;
+    AdvancedTechnologyAttachment* disk3 = new AdvancedTechnologyAttachment( bar2 == 0x00 || bar2 == 0x01 ? 0x170 : bar2, bar3 == 0x00 || bar3 == 0x01 ? 0x376 : bar3, true);
+    if(disk3->Identify()){
+        disks[2] = disk3;
     }
 
-    disk = new AdvancedTechnologyAttachment( bar2 == 0x00 || bar2 == 0x01 ? 0x170 : bar2, bar3 == 0x00 || bar3 == 0x01 ? 0x376 : bar3, false);
-    if(disk->Identify()){
-        disks[3] = disk;
+    AdvancedTechnologyAttachment* disk4 = new AdvancedTechnologyAttachment( bar2 == 0x00 || bar2 == 0x01 ? 0x170 : bar2, bar3 == 0x00 || bar3 == 0x01 ? 0x376 : bar3, false);
+    if(disk4->Identify()){
+        disks[3] = disk4;
     }
     
 }

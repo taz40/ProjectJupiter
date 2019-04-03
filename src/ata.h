@@ -17,6 +17,7 @@ protected:
     Port8Bit controlPort;
     bool master;
     uint16_t bytesPerSector;
+    uint16_t identifyData[256];
 public:
     AdvancedTechnologyAttachment(uint16_t dataPortBase, uint16_t commandPortBase, bool master);
     ~AdvancedTechnologyAttachment();
