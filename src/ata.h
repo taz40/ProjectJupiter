@@ -18,6 +18,12 @@ protected:
     bool master;
     uint16_t bytesPerSector;
     uint16_t identifyData[256];
+    bool lba48Mode;
+    uint8_t udmaModes;
+    uint8_t activeUdmaMode;
+    bool has80PinCable;
+    uint32_t lba28Sectors;
+    uint64_t lba48Sectors;
 public:
     AdvancedTechnologyAttachment(uint16_t dataPortBase, uint16_t commandPortBase, bool master);
     ~AdvancedTechnologyAttachment();
@@ -26,6 +32,7 @@ public:
     void Read28(uint32_t sectorNumber);
     void Write28(uint32_t sector, uint8_t* data, int count);
     void Flush();
+    void PrintInfo();
 };
 
 #endif

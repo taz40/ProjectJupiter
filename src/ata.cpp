@@ -43,7 +43,7 @@ bool AdvancedTechnologyAttachment::Identify(){
     lbaLowPort.Write(0);
     uint8_t status = commandPort.Read();
     if(status == 0x00){
-        terminal_writestring("No Device\n");
+        //terminal_writestring("No Device\n");
         return false;
     }
     
@@ -55,11 +55,11 @@ bool AdvancedTechnologyAttachment::Identify(){
 
     if(lbaMidPort.Read() != 0 || lbaHighPort.Read() != 0){
         if(lbaMidPort.Read() == 0x14 && lbaHighPort.Read() == 0xEB){
-            terminal_writestring("ATAPI device\n");
+            //terminal_writestring("ATAPI device\n");
         }else if(lbaMidPort.Read() == 0x3c && lbaHighPort.Read() == 0xc3){
-            terminal_writestring("SATA device\n");
+            //terminal_writestring("SATA device\n");
         }else{
-            terminal_writestring("no device\n");
+            //terminal_writestring("no device\n");
         }
 
         return false;
@@ -80,7 +80,7 @@ bool AdvancedTechnologyAttachment::Identify(){
     }
 
     if((status & 0x01) == 0x01){
-        terminal_writestring("Device Error\n");
+        //terminal_writestring("Device Error\n");
         return false;
     }
 
@@ -90,8 +90,14 @@ bool AdvancedTechnologyAttachment::Identify(){
         //printHex(data);
         //terminal_writestring(" ");
     }
-    printHex((identifyData[83] & 0x400) >> 10);
-    terminal_writestring("OK\n");
+    bytesPerSector = 512;
+    lba48Mode = (identifyData[83] & 0x400) == 0x400;
+    activeUdmaMode = (identifyData[88] >> 8) & 0xFF;
+    udmaModes = (identifyData[88] & 0xFF);
+    has80PinCable = (identifyData[93] & 0x800) == 0x800;
+    lba28Sectors = ((identifyData[61] & 0xFFFF) << 16) | (identifyData[60] & 0xFFFF);
+    lba48Sectors = ((identifyData[103] & 0xFFFF) << 48) | ((identifyData[102] & 0xFFFF) << 32) | ((identifyData[101] & 0xFFFF) << 16) | (identifyData[100] & 0xFFFF);
+    //terminal_writestring("OK\n");
     
     return true;
     
@@ -107,4 +113,28 @@ void AdvancedTechnologyAttachment::Write28(uint32_t sector, uint8_t* data, int c
 
 void AdvancedTechnologyAttachment::Flush(){
     
+}
+
+void AdvancedTechnologyAttachment::PrintInfo(){
+        terminal_writestring("LBA48: ");
+    if(lba48Mode){
+        terminal_writestring("True\n");
+    }else{
+        terminal_writestring("False\n");
+    }
+    terminal_writestring("UDMA Modes: ");
+    printHex(udmaModes);
+    terminal_writestring("\nActive UDMA Mode: ");
+    printHex(activeUdmaMode);
+    terminal_writestring("\n80 Pin Cable: ");
+    if(has80PinCable){
+        terminal_writestring("True\n");
+    }else{
+        terminal_writestring("False\n");
+    }
+    terminal_writestring("LBA28 Sectors: ");
+    printDecimal(lba28Sectors);
+    terminal_writestring("\nLBA48 Sectors: ");
+    printDecimal(lba48Sectors);
+    terminal_writestring("\n");
 }
