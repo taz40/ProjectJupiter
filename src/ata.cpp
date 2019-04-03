@@ -24,15 +24,15 @@ AdvancedTechnologyAttachment::~AdvancedTechnologyAttachment(){
 }
     
 bool AdvancedTechnologyAttachment::Identify(){
-    devicePort.Write(master ? 0xA0 : 0xB0);
-    controlPort.Write(0);
+    // devicePort.Write(master ? 0xA0 : 0xB0);
+    // controlPort.Write(0);
     
-    devicePort.Write(0xA0);
-    uint8_t status = commandPort.Read();
-    if(status == 0xFF){
-        //terminal_writestring("No Device\n");
-        return false;
-    }
+    // devicePort.Write(0xA0);
+    // uint8_t status = commandPort.Read();
+    // if(status == 0xFF){
+    //     terminal_writestring("No Device\n");
+    //     return false;
+    // }
     
     devicePort.Write(master ? 0xA0 : 0xB0);
     sectorCountPort.Write(0);
@@ -40,10 +40,10 @@ bool AdvancedTechnologyAttachment::Identify(){
     lbaMidPort.Write(0);
     lbaHighPort.Write(0);
     commandPort.Write(0xEC);
-    
-    status = commandPort.Read();
+    lbaLowPort.Write(0);
+    uint8_t status = commandPort.Read();
     if(status == 0x00){
-        //terminal_writestring("No Device\n");
+        terminal_writestring("No Device\n");
         return false;
     }
     
@@ -51,27 +51,45 @@ bool AdvancedTechnologyAttachment::Identify(){
         && ((status & 0x01) != 0x01)){
         status = commandPort.Read();
         //printHex(status);
-        if(lbaMidPort.Read() != 0 || lbaHighPort.Read() != 0){
-            //terminal_writestring("Not an ATA device\n");
-            return false;
+    }
+
+    if(lbaMidPort.Read() != 0 || lbaHighPort.Read() != 0){
+        if(lbaMidPort.Read() == 0x14 && lbaHighPort.Read() == 0xEB){
+            terminal_writestring("ATAPI device\n");
+        }else if(lbaMidPort.Read() == 0x3c && lbaHighPort.Read() == 0xc3){
+            terminal_writestring("SATA device\n");
+        }else{
+            terminal_writestring("no device\n");
         }
+
+        return false;
     }
     
-    if(status & 0x01){
-        if(lbaMidPort.Read() != 0 || lbaHighPort.Read() != 0){
-            //terminal_writestring("Not an ATA device\n");
-            return false;
-        }
-        terminal_writestring("Error\n");
+    // if(status & 0x01){
+    //     if(lbaMidPort.Read() != 0 || lbaHighPort.Read() != 0){
+    //         terminal_writestring("Not an ATA device\n");
+    //         return false;
+    //     }
+    //     terminal_writestring("Error\n");
+    //     return false;
+    // }
+
+    status = commandPort.Read();
+    while((status & 0x08) != 0x08 && (status & 0x01) != 0x01){
+        status = commandPort.Read();
+    }
+
+    if((status & 0x01) == 0x01){
+        terminal_writestring("Device Error\n");
         return false;
     }
     
     for(uint16_t i = 0; i < 256; i++){
         uint16_t data = dataPort.Read();
-        //printHex(data);
-        //terminal_writestring(" ");
+        printHex(data);
+        terminal_writestring(" ");
     }
-    //terminal_writestring("OK\n");
+    terminal_writestring("OK\n");
     
     return true;
     
