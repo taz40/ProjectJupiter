@@ -10,8 +10,8 @@ private:
     static uint16_t diskCount;
 
 public:
-    virtual uint8_t* Read(uint32_t sectorNumber) = 0;
-    virtual void Write(uint32_t sectorNumber, uint8_t* data, int count) = 0;
+    virtual uint8_t* Read(uint32_t sectorNumber);
+    virtual void Write(uint32_t sectorNumber, uint8_t* data, int count);
 
     static void Add(Disk* disk);
     static Disk* GetDisk(uint16_t disk);
