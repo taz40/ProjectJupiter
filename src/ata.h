@@ -2,9 +2,9 @@
 #define __ATA_H
 
 #include "port.h"
-#include "driver.h"
+#include "disk.h"
 
-class AdvancedTechnologyAttachment :  public Driver{
+class AdvancedTechnologyAttachment :  public Disk{
 protected:
     Port16Bit dataPort;
     Port8Bit errorPort;
@@ -29,10 +29,13 @@ public:
     ~AdvancedTechnologyAttachment();
     
     bool Identify();
-    void Read28(uint32_t sectorNumber);
+    uint8_t* Read28(uint32_t sectorNumber);
     void Write28(uint32_t sector, uint8_t* data, int count);
     void Flush();
     void PrintInfo();
+
+    virtual uint8_t* Read(uint32_t sectorNumber);
+    virtual void Write(uint32_t sectorNumber, uint8_t* data, int count);
 };
 
 #endif

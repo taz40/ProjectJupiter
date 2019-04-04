@@ -294,6 +294,16 @@ void HandleCommand(const char* command, uint8_t commandLength){
         PeripheralComponentInterconnectController::instance->ide->PrintIDEInfo();
     }else if(strcomp(command, "lsdisk --all")){
         PeripheralComponentInterconnectController::instance->ide->PrintAllIDEInfo();
+    }else if(strcomp(command, "write")){
+        uint64_t data = 0x4FF54980;
+        Disk::GetDisk(0)->Write(0, (uint8_t*)(&data), 4);
+    }else if(strcomp(command, "read")){
+        uint8_t* data = Disk::GetDisk(0)->Read(0);
+        for(int i = 0; i < 512; i++){
+            printHex(data[i]);
+            terminal_writestring(" ");
+        }
+        terminal_writestring("\n");
     }else{
         terminal_writestring("Unrecognized Command: ");
         terminal_writestring(command);

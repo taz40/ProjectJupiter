@@ -103,7 +103,7 @@ bool AdvancedTechnologyAttachment::Identify(){
     
 }
 
-void AdvancedTechnologyAttachment::Read28(uint32_t sectorNumber){
+uint8_t* AdvancedTechnologyAttachment::Read28(uint32_t sectorNumber){
     devicePort.Write((master ? 0xE0 : 0xF0) | ((sectorNumber >> 24) & 0xF) );
     sectorCountPort.Write(1);
     lbaLowPort.Write(sectorNumber & 0xFF);
@@ -111,11 +111,46 @@ void AdvancedTechnologyAttachment::Read28(uint32_t sectorNumber){
     lbaHighPort.Write((sectorNumber >> 16) & 0xFF);
     commandPort.Write(0x20);
     
+    uint8_t status = commandPort.Read();
+    while((status & 0x8) != 0x8){
+        status = commandPort.Read();
+    }
+
+    uint8_t* buffer = new uint8_t[512];
+    for(int i = 0; i < 256; i++){
+        uint16_t tmp = dataPort.Read();
+        buffer[i*2] = tmp & 0xFF;
+        buffer[(i*2)+1] = (tmp >> 8) & 0xFF;
+    }
+
+    return buffer;
     
 }
 
-void AdvancedTechnologyAttachment::Write28(uint32_t sector, uint8_t* data, int count){
+void AdvancedTechnologyAttachment::Write28(uint32_t sectorNumber, uint8_t* data, int count){
+    devicePort.Write((master ? 0xE0 : 0xF0) | ((sectorNumber >> 24) & 0xF) );
+    sectorCountPort.Write(1);
+    lbaLowPort.Write(sectorNumber & 0xFF);
+    lbaMidPort.Write((sectorNumber >> 8) & 0xFF);
+    lbaHighPort.Write((sectorNumber >> 16) & 0xFF);
+    commandPort.Write(0x30);
     
+    uint8_t status = commandPort.Read();
+    while((status & 0x8) != 0x8){
+        status = commandPort.Read();
+    }
+
+    for(int i = 0; i < 256; i++){
+        uint16_t tmp = 0;
+        if(i*2 < count){
+            tmp |= data[i*2] & 0xFF;
+        }
+        if((i*2)+1 < count){
+            tmp |= (data[(i*2)+1] << 8) & 0xFF00;
+        }
+        dataPort.Write(tmp);
+    }
+    commandPort.Write(0xE7);
 }
 
 void AdvancedTechnologyAttachment::Flush(){
@@ -151,4 +186,12 @@ void AdvancedTechnologyAttachment::PrintInfo(){
         printDecimal((4294965248 >> 21) & 0x7FFFFFFFFFF);
         terminal_writestring("GB)\n");
     }
+}
+
+uint8_t* AdvancedTechnologyAttachment::Read(uint32_t sectorNumber){
+    Read28(sectorNumber);
+}
+
+void AdvancedTechnologyAttachment::Write(uint32_t sectorNumber, uint8_t* data, int count){
+    return Write28(sectorNumber, data, count);
 }
