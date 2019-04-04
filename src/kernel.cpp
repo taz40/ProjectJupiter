@@ -295,7 +295,7 @@ void HandleCommand(const char* command, uint8_t commandLength){
     }else if(strcomp(command, "lsdisk --all")){
         PeripheralComponentInterconnectController::instance->ide->PrintAllIDEInfo();
     }else if(strcomp(command, "write")){
-        uint64_t data = 0xFFEE54;
+        uint64_t data = 0xFFFFFF;
         Disk::GetDisk(0)->Write(0, (uint8_t*)(&data), 4);
     }else if(strcomp(command, "read")){
         uint8_t* data = Disk::GetDisk(0)->Read(0);
