@@ -104,6 +104,13 @@ bool AdvancedTechnologyAttachment::Identify(){
 }
 
 void AdvancedTechnologyAttachment::Read28(uint32_t sectorNumber){
+    devicePort.Write((master ? 0xE0 : 0xF0) | ((sectorNumber >> 24) & 0xF) );
+    sectorCountPort.Write(1);
+    lbaLowPort.Write(sectorNumber & 0xFF);
+    lbaMidPort.Write((sectorNumber >> 8) & 0xFF);
+    lbaHighPort.Write((sectorNumber >> 16) & 0xFF);
+    commandPort.Write(0x20);
+    
     
 }
 
@@ -135,13 +142,13 @@ void AdvancedTechnologyAttachment::PrintInfo(){
     terminal_writestring("LBA28 Sectors: ");
     printDecimal(lba28Sectors);
     terminal_writestring(" (");
-    uint64_t bytes = (uint64_t)lba28Sectors * (uint64_t)bytesPerSector;
-    printDecimal(bytes / 1024 / 1024 / 1024);
+    printDecimal(lba28Sectors >> 21);
     terminal_writestring("GB)\n");
-    terminal_writestring("LBA48 Sectors: ");
-    printDecimal(lba48Sectors);
-    terminal_writestring(" (");
-    uint64_t bytes2 = (uint64_t)lba48Sectors * (uint64_t)bytesPerSector;
-    printDecimal(bytes2 / 1073741824);
-    terminal_writestring("GB)\n");
+    if(lba48Mode){
+        terminal_writestring("LBA48 Sectors: ");
+        printDecimal(lba48Sectors);
+        terminal_writestring(" (");
+        printDecimal((4294965248 >> 21) & 0x7FFFFFFFFFF);
+        terminal_writestring("GB)\n");
+    }
 }
